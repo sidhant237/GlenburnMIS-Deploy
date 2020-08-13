@@ -100,14 +100,14 @@ def pluckingdaily():
 
     con = "FieldEntry.date, DivTab.Div_Name, SecTab.Sec_Name,SquTab.Squ_Name"
     val = "FieldEntry.Mnd_Val, FieldEntry.GL_Val, FieldEntry.Area_Val"
-    fom = "ROUND((GL_Val/Mnd_Val),2), ROUND((GL_Val/Area_Val),2),ROUND((Mnd_Val/Area_Val),2),FieldEntry.pluck_int"
-    con2 = "SecTab.Sec_Prune , SecTab.Sec_Jat"
+    fom = "ROUND((GL_Val/Mnd_Val),2), ROUND((GL_Val/Area_Val),2),ROUND((Mnd_Val/Area_Val),2)"
+    con2 = "SecTab.Sec_Prune , SecTab.Sec_Jat, SecTab.Sec_Area"
     tab = "FieldEntry,SquTab,Jobtab,SecTab,DivTab"
     joi = "FieldEntry.Squ_ID = SquTab.Squ_ID AND FieldEntry.Job_ID=Jobtab.Job_ID AND FieldEntry.Sec_ID=SecTab.Sec_ID AND DivTab.Div_ID=SecTab.Div_ID"
     job = "(FieldEntry.Job_ID = 1 )"
     cur.execute(f'''select {con} , {val} , {fom} , {con2} from {tab} where {joi} and date >={d1} and date <={d2} and {job}''')
 
-    row_headers = ['Date', 'Division','Section_Name', 'Squad_Name', 'Mandays', 'Greenleaf', 'AreaCovered', 'GlMnd', 'GlHa', 'MndHa','PluckInterval''Prune','Jat']
+    row_headers = ['Date', 'Division','Section_Name', 'Squad_Name', 'Mandays', 'Greenleaf', 'AreaCovered', 'GlMnd', 'GlHa', 'MndHa','Prune','Jat', 'SecArea']
     rv = cur.fetchall()
     json_data = []
 

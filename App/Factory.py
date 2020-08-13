@@ -12,6 +12,8 @@ from dateutil.relativedelta import relativedelta
 @cross_origin()
 def displayfactory():      
       d1 = request.args.get("start") #"2020-07-01"
+      if not d1:
+            d1 = "2020-07-01"
       d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
       d1 = "'" + d1 + "'"
       d0 = "'2020-07-01'"  # start date current year
@@ -120,7 +122,7 @@ def displayfactory():
       rv3 = cur.fetchall()
 
             #SUM-PERGRADE-DATERANGE
-      cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date >={d1} and date <={d2} group by TeaGradeTab.TeaGrade_Name ")
+      cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date >={d1}")
       rv1 = cur.fetchall()
 
             #PERGRADE-DATE
@@ -128,7 +130,7 @@ def displayfactory():
       rv4 = cur.fetchall()      
 
             #GRADE-NAME
-      cur.execute(f"SELECT TeaGradeTab.TeaGrade_Name FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date >={d1} and date <={d2} group by TeaGradeTab.TeaGrade_Name ")
+      cur.execute(f"SELECT TeaGradeTab.TeaGrade_Name FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date >={d1}")
       rv2 = cur.fetchall()
 
       x = [s[0] for s in rv]
@@ -157,5 +159,5 @@ def displayfactory():
       json_comp = {} 
       json_comp['TeaMade'] = json_data
       json_comp['Greenleaf'] = json_data1
-      json_comp['GradePer'] =json_data2
+      json_comp['GradePer'] =json_data5
       return json.dumps(json_comp)
