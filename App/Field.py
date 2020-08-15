@@ -209,63 +209,6 @@ def fuelreport():
     return json.dumps(json_data, default=sids_converter)  
 
 
-#7 tea stock - removed from app
-
-
-#8
-@app.route('/teamade', methods=['GET', 'POST'])
-@cross_origin()
-def displayteamade():
-    cur = mysql.connection.cursor()   
-    rv = []
-
-    d1 = request.args.get("start") 
-    d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
-    d1 = "'" + d1 + "'"
-    d0 = "'2020-03-01'"  # start date current year
-    d00 = "'2019-03-01'"  # start date last year
-
-
-    # [TM TODAY]
-    val = "TMEntry.TM_Val "
-    tab = "TMEntry"
-    cur.execute(f'''select {val} from {tab} where TM_Date = {d1} ''')
-    rv.append(cur.fetchall()[0][0])
-
-    # [TM TODATE]
-    val1 = "sum(TMEntry.TM_Val)"
-    tab1 = "TMEntry"
-    cur.execute(f'''select {val1} from {tab1} where TM_Date >= {d0} AND TM_Date <= {d1} ''')
-    rv.append(cur.fetchall()[0][0])
-
-    # [TM TODATE LAST YEAR]
-    val2 = "sum(TMEntry.TM_Val)"
-    tab2 = "TMEntry"
-    cur.execute(f'''select {val2} from {tab2} where TM_Date >= {d00} AND TM_Date <= {d11} ''')
-    rv.append(cur.fetchall()[0][0])
-
-    # [RECOVERY % TODAY
-    val3 = " ROUND(SUM(FieldEntry.GL_Val)/SUM(TMEntry.TM_Val),4) * 100 "
-    tab3 = "TMEntry , FieldEntry"
-    joi3 = "(TMEntry.TM_Date = FieldEntry.Date) and (TMEntry.TM_Date="
-    cur.execute(f'''select {val3} from {tab3} where {joi3}{d1})''')
-    rv.append(cur.fetchall()[0][0])
-
-    # [RECOVERY % TO DATE
-    val4 = " ROUND(SUM(FieldEntry.GL_Val)/SUM(TMEntry.TM_Val),4) * 100 "
-    tab4 = 'TMEntry , FieldEntry'
-    joi4 = "(TMEntry.TM_Date = FieldEntry.Date) and (TMEntry.TM_Date>="
-    cur.execute(f'''select {val4} from {tab4} where {joi4}{d0}) and (TMEntry.TM_Date<={d1})''')
-    rv.append(cur.fetchall()[0][0])
-
-    def sids_converter(o):
-        if isinstance(o, datetime.date):
-            return str(o.year) + str("/") + str(o.month) + str("/") + str(o.day)
-
-    column_headers = ['TM Today', 'TM Todate', 'TM Todate LY', 'Recovery % Today', 'Recovery% Todate']
-    json_data = []
-    json_data.append(dict(zip(column_headers, rv)))
-    return json.dumps(json_data, default=sids_converter)
 
 
 #9##
@@ -273,10 +216,8 @@ def displayteamade():
 @cross_origin()
 def greenleaf():
     cur = mysql.connection.cursor()
-    #d1 = request.args.get("start") 
-    d1 = "2020-08-14"    
-    dx = "2021-08-14"
-    d11 = "'" + str((datetime.datetime.strptime(dx, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
+    d1 = request.args.get("start") 
+    d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
     d1 = "'" + d1 + "'"
 
     #DIV NAME
