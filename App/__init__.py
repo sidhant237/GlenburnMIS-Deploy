@@ -15,12 +15,11 @@ mysql = MySQL(app)
 #initializing CORS
 cors = CORS(app)
 
-
 #initializing mail service
 mail = Mail(app)
 
 #importing views
-from App import DailyReport, Email, Factory, Field, Upload
+from App import DailyReport, Email, Factory, Field, Upload, TestField
 
 def get_app():
 	return app

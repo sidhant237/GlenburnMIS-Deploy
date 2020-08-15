@@ -11,14 +11,16 @@ from dateutil.relativedelta import relativedelta
 @app.route('/factory', methods=['GET', 'POST'])
 @cross_origin()
 def displayfactory():      
-      d1 = request.args.get("start") #"2020-07-01"
-      if not d1:
-            d1 = "2020-07-01"
-      d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
-      d1 = "'" + d1 + "'"
-      d0 = "'2020-07-01'"  # start date current year
-      d00 = "'2019-03-01'"  # start date last year
-      
+      #d1 = request.args.get("start") 
+      #if not d1:
+      #      d1 = "2020-08-14"
+      #d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
+      #d1 = "'" + d1 + "'"
+      d0 = "'2020-08-14'"  # start date current year
+      d00 = "'2020-08-14'"  # start date last year
+      d2 = "'2020-8-14'"
+      d1 = "'2020-8-14'"
+      d11 = "'2020-8-14'"
       cur = mysql.connection.cursor()     
       rv = []
       ##TEA MADE
@@ -122,21 +124,21 @@ def displayfactory():
       rv3 = cur.fetchall()
 
             #SUM-PERGRADE-DATERANGE
-      cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date >={d1}")
+      cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} group by TeaGradeTab.TeaGrade_ID")
       rv1 = cur.fetchall()
 
             #PERGRADE-DATE
-      cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} group by TeaGradeTab.TeaGrade_Name ")
+      cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d2} group by TeaGradeTab.TeaGrade_ID ")
       rv4 = cur.fetchall()      
 
             #GRADE-NAME
-      cur.execute(f"SELECT TeaGradeTab.TeaGrade_Name FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date >={d1}")
+      cur.execute(f"SELECT TeaGradeTab.TeaGrade_Name FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1}")
       rv2 = cur.fetchall()
 
       x = [s[0] for s in rv]
       xx = [s[0] for s in rv3]
       y = [i[0] for i in rv1]
-      yy = [i[0] for i in rv4]
+      yy = [h[0] for h in rv4]
       w = [str(u[0]) for u in rv2]
 
       z = []
@@ -145,7 +147,7 @@ def displayfactory():
 
       zz = []
       for number in yy:
-            zz.append((round((number / x[0]),2)*100))
+            zz.append((round((number / xx[0]),2)*100))
 
       zzz = zip(w,zz,z)
 

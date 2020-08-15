@@ -19,13 +19,13 @@ def cultivationdaily():
     cur = mysql.connection.cursor()
     d1 = "'" + (str(request.args.get("start"))) + "'"
     d2 = "'" + (str(request.args.get("end"))) + "'"
-
+    
     con = "FieldEntry.Date, Jobtab.Job_Name, DivTab.Div_Name, SecTab.Sec_Name, SquTab.Squ_Name"
     val = "Mnd_Val, Area_Val"
     fom = "ROUND((Mnd_Val/Area_Val),2)"
     tab = "FieldEntry,SquTab,Jobtab,SecTab,DivTab"
     joi = "FieldEntry.Squ_ID = SquTab.Squ_ID AND FieldEntry.Job_ID=Jobtab.Job_ID AND FieldEntry.Sec_ID=SecTab.Sec_ID AND DivTab.Div_ID=SecTab.Div_ID"
-    job = "(FieldEntry.Job_ID = 2 or FieldEntry.Job_ID = 3 or FieldEntry.Job_ID = 4)"
+    job = "(Jobtab.Job_Type = 2)"
     cur.execute(f'''select {con} , {val} , {fom} from {tab} where {joi} and date >={d1} and date <={d2} and {job}''')
     rv = cur.fetchall()
 
@@ -46,37 +46,19 @@ def cultivationdaily():
 @cross_origin()
 def cultivationgroup():
     cur = mysql.connection.cursor()
-    # d1 = "'" + (str(request.args.get("start"))) + "'"
-    # d2 = "'" + (str(request.args.get("end"))) + "'"
-    # grp = "'" + (str(request.args.get("grpby"))) + "'"
-    d1 = "'2020-07-01'"
-    d2 = "'2020-07-14'"
-    grp = "'job'"
+    d1 = "'" + (str(request.args.get("start"))) + "'"
+    d2 = "'" + (str(request.args.get("end"))) + "'"
 
-    print(type(d1), type(grp))
-
-    if grp == "'job'":
-        con = "Jobtab.Job_Name"
-        val = "sum(FieldEntry.Mnd_Val)"
-        val1 = "sum(FieldEntry.Area_Val)"
-        fom = "ROUND((sum(FieldEntry.Mnd_Val))/(sum(FieldEntry.Area_Val)),2)"
-        tab = "FieldEntry,SquTab,Jobtab,SecTab,DivTab"
-        joi = "FieldEntry.Squ_ID = SquTab.Squ_ID AND FieldEntry.Job_ID=Jobtab.Job_ID AND FieldEntry.Sec_ID=SecTab.Sec_ID AND DivTab.Div_ID=SecTab.Div_ID"
-        job = "(FieldEntry.Job_ID = 2 or FieldEntry.Job_ID = 3 or FieldEntry.Job_ID = 4)"
-        cur.execute(f'''select {con} , {val} , {val1} , {fom}  from {tab} where {joi} and date >={d1} and date <={d2} and {job} group by FieldEntry.Job_ID''')
-        rv = cur.fetchall()
-        row_headers = ['Job_Name', 'Mandays', 'AreaCovered', 'MndArea']
-
-    elif grp == "'section'":
-        con = "SecTab.Sec_Name"
-        val = "sum(FieldEntry.Mnd_Val)"
-        val1 = "sum(FieldEntry.Area_Val)"
-        fom = "ROUND((SUM(FieldEntry.Mnd_Val))/(SUM(FieldEntry.Area_Val)),2)"
-        tab = "FieldEntry,SquTab,Jobtab,SecTab,DivTab"
-        joi = "FieldEntry.Squ_ID = SquTab.Squ_ID AND FieldEntry.Job_ID=Jobtab.Job_ID AND FieldEntry.Sec_ID=SecTab.Sec_ID AND DivTab.Div_ID=SecTab.Div_ID"
-        cur.execute(f'''select {con} , {val} , {val1} , {fom}  from {tab} where {joi} and date >={d1} and date <={d2} group by FieldEntry.Sec_ID''')
-        rv = cur.fetchall()
-        row_headers = ['Section_Name', 'Mandays', 'AreaCovered', 'MndArea']
+    con = "Jobtab.Job_Name"
+    val = "sum(FieldEntry.Mnd_Val)"
+    val1 = "sum(FieldEntry.Area_Val)"
+    fom = "ROUND((sum(FieldEntry.Mnd_Val))/(sum(FieldEntry.Area_Val)),2)"
+    tab = "FieldEntry,SquTab,Jobtab,SecTab,DivTab"
+    joi = "FieldEntry.Squ_ID = SquTab.Squ_ID AND FieldEntry.Job_ID=Jobtab.Job_ID AND FieldEntry.Sec_ID=SecTab.Sec_ID AND DivTab.Div_ID=SecTab.Div_ID"
+    job = "(Jobtab.Job_Type = 2)"
+    cur.execute(f'''select {con} , {val} , {val1} , {fom}  from {tab} where {joi} and date >={d1} and date <={d2} and {job} group by FieldEntry.Job_ID''')
+    rv = cur.fetchall()
+    row_headers = ['Job_Name', 'Mandays', 'AreaCovered', 'MndArea']
 
     json_data = []
 
@@ -209,7 +191,7 @@ def fuelreport():
     d2 = "'" + (str(request.args.get("end"))) + "'"
 
     con = " MachineTab.Mach_Name"
-    fom = " sum(FuelEntry.Fuel_Val), sum(TM_Val), ROUND((SUM(TM_Val)/sum(FuelEntry.Fuel_Val)),2)"
+    fom = " sum(FuelEntry.Fuel_Val), sum(TM_Val), ROUND((/sum(FuelEntry.Fuel_Val/sum(TMEntry.TM_Val))),2)"
     tab = "FuelEntry, MachineTab, FuelTab, TMEntry"
     joi = "FuelEntry.Fuel_ID = FuelTab.Fuel_ID AND FuelEntry.Mach_ID = MachineTab.Mach_ID AND TMEntry.TM_Date = FuelEntry.Date"
     cur.execute(f'''select {con} , {fom}  from {tab} where {joi} and date >= {d1} and date <= {d2} group by MachineTab.Mach_Name''')
@@ -291,8 +273,10 @@ def displayteamade():
 @cross_origin()
 def greenleaf():
     cur = mysql.connection.cursor()
-    d1 = request.args.get("start") #"2020-07-01"
-    d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
+    #d1 = request.args.get("start") 
+    d1 = "2020-08-14"    
+    dx = "2021-08-14"
+    d11 = "'" + str((datetime.datetime.strptime(dx, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
     d1 = "'" + d1 + "'"
 
     #DIV NAME
