@@ -302,7 +302,7 @@ Sizes: [
 										tables centered in the emailBody table,
 										in case its width is set to 100%.
 									-->
-									<table border="0" cellpadding="0" cellspacing="0" width="100%" style="color:#FFFFFF;" bgcolor="#3498db">
+									<table border="0" cellpadding="0" cellspacing="0" width="100%" style="color:#FFFFFF;" bgcolor="#007e4f">
 										<tr>
 											<td align="center" valign="top">
 												<!-- FLEXIBLE CONTAINER // -->
@@ -325,9 +325,9 @@ Sizes: [
 															<table border="0" cellpadding="30" cellspacing="0" width="100%">
 																<tr>
 																	<td align="center" valign="top" class="textContent">
-																		<h1 style="color:#FFFFFF;line-height:100%;font-family:Helvetica,Arial,sans-serif;font-size:35px;font-weight:normal;margin-bottom:5px;text-align:center;">GlenMIS</h1>
-																		<h2 style="text-align:center;font-weight:normal;font-family:Helvetica,Arial,sans-serif;font-size:23px;margin-bottom:10px;color:#275100;line-height:135%;">Daily Report</h2>
-																		<div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;color:#FFFFFF;line-height:135%;">Good Day, Your daily report is ready and exported.</div>
+																		<h1 style="color:#FFFFFF;line-height:100%;font-family:Helvetica,Arial,sans-serif;font-size:35px;font-weight:normal;margin-bottom:5px;text-align:center;">Glenburn Tea Estate</h1>
+																		<h2 style="text-align:center;font-weight:normal;font-family:Helvetica,Arial,sans-serif;font-size:23px;margin-bottom:10px;color: white;line-height:135%;">Days Report</h2>
+																		<div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;color:#FFFFFF;line-height:135%;">{{ date.strftime('%b %d %Y') }}</div>
 																	</td>
 																</tr>
 															</table>
@@ -363,119 +363,177 @@ Sizes: [
 
 																		<!-- CONTENT TABLE // -->
 																		<table border="0" cellpadding="0" cellspacing="0" width="100%">
-																			<tr>
+																			<tr style="display: flex; flex-direction: column; justify-content: center;">
 																				<td valign="top" class="textContent">
 
-																					<div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;margin-top:10px;color:#5F5F5F;line-height:135%;">
-																						<table class="table" style="border: 1px solid black; border-radius: 5px; padding: 5px;">
-																							<thead>
-																							  <tr>
-																								<th scope="col" style="text-align: center;">TM Today</th>
-																								<th scope="col" style="text-align: center;">TM To date</th>
-																								<th scope="col" style="text-align: center;">TM Todate LY</th>
-																								<th scope="col" style="text-align: center;">Recovery Today</th>
-																								<th scope="col" style="text-align: center;">Recovery Todate</th>
-																							  </tr>
-																							</thead>
-																							<tbody>
-																							{% for item in data['TeaMade'] %}
-																							  <tr>
-																								<td style="text-align: center;">{{ item['TMToday'] }}</td>
-																								<td style="text-align: center;">{{ item['TMTodate'] }}</td>
-																								<td style="text-align: center;">{{ item['TMTodateLY'] }}</td>
-																								<td style="text-align: center;">{{ item['RecoveryToday'] }}</td>
-																								<td style="text-align: center;">{{ item['RecoveryTodate'] }}</td>
-																							  </tr>
-																							{% endfor %}
-																							</tbody>
-																						</table>
-																					</div>
+																						<div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;margin-top:30px;color:#5F5F5F;line-height:135%;">
+																							<table class="table" class="table" style="border: 1px solid #007e4f; border-radius: 5px; padding: 5px;">
+																								<thead>
+																								<tr>
+																									<th scope="col" style="text-align: center;">Job Name</th>
+																									<th scope="col" style="text-align: center;">Mandays</th>
+																								</tr>
+																								</thead>
+																								<tbody>
+																								{% for item in data['Mandays'] %}
+																								<tr>
+																									<td style="text-align: center;">{{ item['Job_Name'] }}</td>
+																									<td style="text-align: center;">{{ item['Mandays'] }}</td>
+																								</tr>
+																								{% endfor %}
+																								</tbody>
+																							</table>
+																						</div>
 
-																					<div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;margin-top:30px;color:#5F5F5F;line-height:135%;">
-																						<table class="table" class="table" style="border: 1px solid black; border-radius: 5px; padding: 5px;">
-																							<thead>
-																							  <tr>
-																								<th scope="col" style="text-align: center;">Division</th>
-																								<th scope="col" style="text-align: center;">GL Today</th>
-																								<th scope="col" style="text-align: center;">GL Today LY</th>
-																								<th scope="col" style="text-align: center;">Fine Leaf</th>
-																							  </tr>
-																							</thead>
-																							<tbody>
-																							{% for item in data['Greenleaf'] %}
-																							  <tr>
-																								<td style="text-align: center;">{{ item['Division'] }}</td>
-																								<td style="text-align: center;">{{ item['GLToday'] }}</td>
-																								<td style="text-align: center;">{{ item['GLTodayLY'] }}</td>
-																								<td style="text-align: center;">{{ item['FineLeaf'] }}</td>
-																							  </tr>
-																							{% endfor %}
-																							</tbody>
-																						</table>
-																					</div>
+																						<div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;margin-top:30px;color:#5F5F5F;line-height:135%;">
+																							<table class="table" class="table" style="border: 1px solid #007e4f; border-radius: 5px; padding: 5px;">
+																								<thead>
+																								<tr>
+																									<th scope="col" style="text-align: center;">Grade</th>
+																									<th scope="col" style="text-align: center;">Percent Today</th>
+																									<th scope="col" style="text-align: center;">Percent Todate</th>
+																								</tr>
+																								</thead>
+																								<tbody>
+																								{% for item in data['GradePer'] %}
+																								<tr>
+																									<td style="text-align: center;">{{ item['Grade'] }}</td>
+																									<td style="text-align: center;">{{ item['PercentToday'] }}</td>
+																									<td style="text-align: center;">{{ item['PercentTodate'] | round(1, 'floor')}}</td>
+																								</tr>
+																								{% endfor %}
+																								</tbody>
+																							</table>
+																						</div>
 
-																					<div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;margin-top:30px;color:#5F5F5F;line-height:135%;">
-																						<table class="table" class="table" style="border: 1px solid black; border-radius: 5px; padding: 5px;">
-																							<thead>
-																							  <tr>
-																								<th scope="col" style="text-align: center;">Machine</th>
-																								<th scope="col" style="text-align: center;">Fuel Used</th>
-																								<th scope="col" style="text-align: center;">TM</th>
-																								<th scope="col" style="text-align: center;">TM Fuel</th>
-																							  </tr>
-																							</thead>
-																							<tbody>
-																							{% for item in data['Fuel_Report'] %}
-																							  <tr>
-																								<td style="text-align: center;">{{ item['Machine'] }}</td>
-																								<td style="text-align: center;">{{ item['FuelUsed'] }}</td>
-																								<td style="text-align: center;">{{ item['TM'] }}</td>
-																								<td style="text-align: center;">{{ item['TMFuel'] }}</td>
-																							  </tr>
-																							{% endfor %}
-																							</tbody>
-																						</table>
-																					</div>
+																						<div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;margin-top:30px;color:#5F5F5F;line-height:135%;">
+																							<table class="table" class="table" style="border: 1px solid #007e4f; border-radius: 5px; padding: 5px;">
+																								<thead>
+																								<tr>
+																									<th scope="col" style="text-align: center;">Division</th>
+																									<th scope="col" style="text-align: center;">GL Today</th>
+																									<th scope="col" style="text-align: center;">GL Today LY</th>
+																									<th scope="col" style="text-align: center;">Fine Leaf</th>
+																								</tr>
+																								</thead>
+																								<tbody>
+																								{% for item in data['Greenleaf'] %}
+																								<tr>
+																									<td style="text-align: center;">{{ item['Division'] }}</td>
+																									<td style="text-align: center;">{{ item['GLToday'] }}</td>
+																									<td style="text-align: center;">{{ item['GLTodayLY'] }}</td>
+																									<td style="text-align: center;">{{ item['FineLeaf'] }}</td>
+																								</tr>
+																								{% endfor %}
+																								</tbody>
+																							</table>
+																						</div>
 
-																					<div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;margin-top:30px;color:#5F5F5F;line-height:135%;">
-																						<table class="table" class="table" style="border: 1px solid black; border-radius: 5px; padding: 5px;">
-																							<thead>
-																							  <tr>
-																								<th scope="col" style="text-align: center;">Grade</th>
-																								<th scope="col" style="text-align: center;">Quantity</th>
-																								<th scope="col" style="text-align: center;">Percent</th>
-																							  </tr>
-																							</thead>
-																							<tbody>
-																							{% for item in data['GradePercent'] %}
-																							  <tr>
-																								<td style="text-align: center;">{{ item['Grade'] }}</td>
-																								<td style="text-align: center;">{{ item['Qnty'] }}</td>
-																								<td style="text-align: center;">{{ item['Percent'] | round(1, 'floor')}}</td>
-																							  </tr>
-																							{% endfor %}
-																							</tbody>
-																						</table>
-																					</div>
+																						<div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;margin-top:30px;color:#5F5F5F;line-height:135%;">
+																							<table class="table" class="table" style="border: 1px solid #007e4f; border-radius: 5px; padding: 5px;">
+																								<thead>
+																								<tr>
+																									<th scope="col" style="text-align: center;">Machine</th>
+																									<th scope="col" style="text-align: center;">Fuel Used</th>
+																									<th scope="col" style="text-align: center;">TM</th>
+																									<th scope="col" style="text-align: center;">TM Fuel</th>
+																								</tr>
+																								</thead>
+																								<tbody>
+																								{% for item in data['FuelReport'] %}
+																								<tr>
+																									<td style="text-align: center;">{{ item['Machine'] }}</td>
+																									<td style="text-align: center;">{{ item['FuelUsed'] }}</td>
+																									<td style="text-align: center;">{{ item['TM'] }}</td>
+																									<td style="text-align: center;">{{ item['TMFuel'] }}</td>
+																								</tr>
+																								{% endfor %}
+																								</tbody>
+																							</table>
+																						</div>
 
-																					<div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;margin-top:30px;color:#5F5F5F;line-height:135%;">
-																						<table class="table" class="table" style="border: 1px solid black; border-radius: 5px; padding: 5px;">
-																							<thead>
-																							  <tr>
-																								<th scope="col" style="text-align: center;">Job Name</th>
-																								<th scope="col" style="text-align: center;">Mandays</th>
-																							  </tr>
-																							</thead>
-																							<tbody>
-																							{% for item in data['Mandays'] %}
-																							  <tr>
-																								<td style="text-align: center;">{{ item['Job_Name'] }}</td>
-																								<td style="text-align: center;">{{ item['Mandays'] }}</td>
-																							  </tr>
-																							{% endfor %}
-																							</tbody>
-																						</table>
-																					</div>
+																						<div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;margin-top:10px;color:#5F5F5F;line-height:135%; ">
+																							<table class="table" style="border: 1px solid #007e4f; border-radius: 5px; padding: 5px;">
+																								<thead>
+																								<tr>
+																									<th scope="col" style="text-align: center;">TM Today</th>
+																									<th scope="col" style="text-align: center;">TM To date</th>
+																									<th scope="col" style="text-align: center;">TM Todate LY</th>
+																									<th scope="col" style="text-align: center;">Recovery Today</th>
+																									<th scope="col" style="text-align: center;">Recovery Todate</th>
+																								</tr>
+																								</thead>
+																								<tbody>
+																								{% for item in data['TeaMade'] %}
+																								<tr>
+																									<td style="text-align: center;">{{ item['TMToday'] }}</td>
+																									<td style="text-align: center;">{{ item['TMTodate'] }}</td>
+																									<td style="text-align: center;">{{ item['TMTodateLY'] }}</td>
+																									<td style="text-align: center;">{{ item['RecoveryToday'] }}</td>
+																									<td style="text-align: center;">{{ item['RecoveryTodate'] }}</td>
+																								</tr>
+																								{% endfor %}
+																								</tbody>
+																							</table>
+																						</div>
+
+																						<div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;margin-top:10px;color:#5F5F5F;line-height:135%;">
+																							<table class="table" style="border: 1px solid #007e4f; border-radius: 5px; padding: 5px;">
+																								<thead>
+																								<tr>
+																									<th scope="col" style="text-align: center;">Job Name</th>
+																									<th scope="col" style="text-align: center;">Division</th>
+																									<th scope="col" style="text-align: center;">Section Name</th>
+																									<th scope="col" style="text-align: center;">Mandays</th>
+																									<th scope="col" style="text-align: center;">Area Covered</th>
+																									<th scope="col" style="text-align: center;">MndArea</th>
+																								</tr>
+																								</thead>
+																								<tbody>
+																								{% for item in data['Cultivation'] %}
+																								<tr>
+																									<td style="text-align: center;">{{ item['Job_Name'] }}</td>
+																									<td style="text-align: center;">{{ item['Division'] }}</td>
+																									<td style="text-align: center;">{{ item['Section_Name'] }}</td>
+																									<td style="text-align: center;">{{ item['Mandays'] }}</td>
+																									<td style="text-align: center;">{{ item['AreaCovered'] }}</td>
+																									<td style="text-align: center;">{{ item['MndArea'] }}</td>
+																								</tr>
+																								{% endfor %}
+																								</tbody>
+																							</table>
+																						</div>
+
+																						<div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;margin-top:10px;color:#5F5F5F;line-height:135%;">
+																							<table class="table" style="border: 1px solid #007e4f; border-radius: 5px; padding: 5px;">
+																								<thead>
+																								<tr>
+																									<th scope="col" style="text-align: center;">Division</th>
+																									<th scope="col" style="text-align: center;">Section Name</th>
+																									<th scope="col" style="text-align: center;">Mandays</th>
+																									<th scope="col" style="text-align: center;">Greenleaf</th>
+																									<th scope="col" style="text-align: center;">Area Covered</th>
+																									<th scope="col" style="text-align: center;">GlMnd</th>
+																									<th scope="col" style="text-align: center;">GlHa</th>
+																									<th scope="col" style="text-align: center;">MndHa</th>
+																								</tr>
+																								</thead>
+																								<tbody>
+																								{% for item in data['Plucking'] %}
+																								<tr>
+																									<td style="text-align: center;">{{ item['Division'] }}</td>
+																									<td style="text-align: center;">{{ item['Section_Name'] }}</td>
+																									<td style="text-align: center;">{{ item['Mandays'] }}</td>
+																									<td style="text-align: center;">{{ item['Greenleaf'] }}</td>
+																									<td style="text-align: center;">{{ item['AreaCovered'] }}</td>
+																									<td style="text-align: center;">{{ item['GlMnd'] }}</td>
+																									<td style="text-align: center;">{{ item['GlHa'] }}</td>
+																									<td style="text-align: center;">{{ item['MndHa'] }}</td>
+																								</tr>
+																								{% endfor %}
+																								</tbody>
+																							</table>
+																						</div>
 
 																				</td>
 																			</tr>

@@ -7,19 +7,19 @@ import pandas as pd
 from dateutil.relativedelta import relativedelta
 
 #9m
-@app.route('/email', methods=['GET', 'POST'])
+@app.route('/email-report', methods=['GET', 'POST'])
 @cross_origin()
 def email():
-    email_data = factory()
+    email_data, current_date = email_report()
     def sids_converter(o):
         if isinstance(o, datetime.date):
                 return str(o.year) + str("/") + str(o.month) + str("/") + str(o.day)
 
-    send_mail(email_data)
+    send_mail(email_data, current_date)
     return json.dumps({'message': 'success'})
 
 
-def fuel_report():
+def email_report():
     cur = mysql.connection.cursor()
     d1 = request.args.get("start")
     if not d1:
@@ -270,23 +270,25 @@ def fuel_report():
 
 
     json_final = {}
-    json_final['Greenleaf'] = json_data
-    json_final['TeaMade'] = json_data1
-    json_final['Mandays'] = json_data2
-    json_final['Plucking'] = json_data3
-    json_final['Cultivation'] = json_data4
-    json_final['GradePer'] = json_data5
-    json_final['FuelReport'] = json_data6
-    return json.dumps(json_final,default=sids_converter)
+    json_final['Greenleaf'] = json_data #4
+    json_final['TeaMade'] = json_data1 #5
+    json_final['Mandays'] = json_data2 #2
+    json_final['Plucking'] = json_data3 #8
+    json_final['Cultivation'] = json_data4 #5
+    json_final['GradePer'] = json_data5 #3
+    json_final['FuelReport'] = json_data6 #4
+
+    return json_final, d1
 
 
 
 
-def send_mail(email_data):
+def send_mail(email_data, current_date):
     subject = "Excel Report"
     recipients = ['joshyjoy999@gmail.com'] # 'sidhant237@gmail.com' 
     body = "Good Day, \n\n Your Daily report file is here. \n\n Thank you."
     msg = Message(subject=subject, body=body, recipients=recipients, sender="from@example.com")
-    msg.html = render_template('index.html', data = email_data)
+    current_date = datetime.datetime.strptime(current_date[1:11], '%Y-%m-%d')
+    msg.html = render_template('index.html', data = email_data, date=current_date)
  
     return mail.send(msg)
