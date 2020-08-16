@@ -284,11 +284,11 @@ def email_report():
 
 
 def send_mail(email_data, current_date):
-    subject = "Excel Report"
+    current_date = datetime.datetime.strptime(current_date[1:11], '%Y-%m-%d')
+    subject = "Excel Report " + current_date.strftime('%b %d %Y') 
     recipients = ['joshyjoy999@gmail.com'] # 'sidhant237@gmail.com' 
     body = "Good Day, \n\n Your Daily report file is here. \n\n Thank you."
     msg = Message(subject=subject, body=body, recipients=recipients, sender="from@example.com")
-    current_date = datetime.datetime.strptime(current_date[1:11], '%Y-%m-%d')
     msg.html = render_template('index.html', data = email_data, date=current_date)
  
     return mail.send(msg)
