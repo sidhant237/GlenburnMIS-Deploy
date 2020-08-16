@@ -11,16 +11,13 @@ from dateutil.relativedelta import relativedelta
 @app.route('/factory', methods=['GET', 'POST'])
 @cross_origin()
 def displayfactory():      
-      #d1 = request.args.get("start") 
-      #if not d1:
-      #      d1 = "2020-08-14"
-      #d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
-      #d1 = "'" + d1 + "'"
-      d0 = "'2020-08-14'"  # start date current year
-      d00 = "'2020-08-14'"  # start date last year
-      d2 = "'2020-8-14'"
-      d1 = "'2020-8-14'"
-      d11 = "'2020-8-14'"
+      d1 = request.args.get("start") 
+      if not d1:
+            d1 = "2020-08-14"
+      d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
+      d1 = "'" + d1 + "'"
+      d0 = "'2020-01-01'"  # start date current year
+      d00 = "'2019-01-01'"  # start date last year
       cur = mysql.connection.cursor()     
       rv = []
       ##TEA MADE
@@ -128,7 +125,7 @@ def displayfactory():
       rv1 = cur.fetchall()
 
             #PERGRADE-DATE
-      cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d2} group by TeaGradeTab.TeaGrade_ID ")
+      cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} group by TeaGradeTab.TeaGrade_ID ")
       rv4 = cur.fetchall()      
 
             #GRADE-NAME

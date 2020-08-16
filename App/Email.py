@@ -23,13 +23,11 @@ def email_report():
     cur = mysql.connection.cursor()
     d1 = request.args.get("start")
     if not d1:
-      d1 = '2021-08-14'
+      d1 = '2020-08-14'
     d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
     d1 = "'" + d1 + "'"
-    d1 = "'2020-08-14'"
     d0 = "'2020-03-01'"  # start date current year
     d00 = "'2019-03-01'"  # start date last year
-    d2 = d1
     
     #DIV NAME
     val = "DivTab.Div_name"
@@ -217,7 +215,7 @@ def email_report():
     rv1 = cur.fetchall()
 
           #PERGRADE-DATE
-    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d2} group by TeaGradeTab.TeaGrade_ID ")
+    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} group by TeaGradeTab.TeaGrade_ID ")
     rv4 = cur.fetchall()      
 
           #GRADE-NAME
