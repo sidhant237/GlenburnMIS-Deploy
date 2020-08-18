@@ -23,7 +23,7 @@ def email_report():
     cur = mysql.connection.cursor()
     d1 = request.args.get("start")
     if not d1:
-      d1 = '2020-08-14'
+      d1 = '2020-08-18'
     d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
     d1 = "'" + d1 + "'"
     d0 = "'2020-03-01'"  # start date current year
@@ -283,8 +283,8 @@ def email_report():
 
 def send_mail(email_data, current_date):
     current_date = datetime.datetime.strptime(current_date[1:11], '%Y-%m-%d')
-    subject = "Excel Report " + current_date.strftime('%b %d %Y') 
-    recipients = ['joshyjoy999@gmail.com'] # 'sidhant237@gmail.com' 
+    subject = "Garden Report " + current_date.strftime('%b %d %Y') 
+    recipients = ['sidhant237@gmail.com'] # 'sidhant237@gmail.com' 
     body = "Good Day, \n\n Your Daily report file is here. \n\n Thank you."
     msg = Message(subject=subject, body=body, recipients=recipients, sender="from@example.com")
     msg.html = render_template('index.html', data = email_data, date=current_date)

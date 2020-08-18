@@ -162,7 +162,7 @@ def mandaydeployment():
     cur = mysql.connection.cursor()
     d1 = "'" + (str(request.args.get("start"))) + "'"
     d2 = "'" + (str(request.args.get("end"))) + "'"
-
+    
     con = "Jobtab.Job_Name"
     val = "SUM(FieldEntry.Mnd_Val)"
     tab = "FieldEntry,Jobtab"
