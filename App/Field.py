@@ -350,13 +350,10 @@ def invoicelist():
 def get_dates():
     cur = mysql.connection.cursor()
     cur.execute("select * from Dates")
-    headers = ['Date']
-    rv = cur.fetchall()
-    json_data = []
+    rv = cur.fetchall()[0][0]
 
     def sids_converter(o):
         if isinstance(o, datetime.date):
                 return str(o.year) + str("/") + str(o.month) + str("/") + str(o.day)
-
-    json_data.append(dict(zip(headers, rv)))
+    json_data = {'Date': rv}
     return json.dumps(json_data, default=sids_converter)
