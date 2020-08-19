@@ -42,9 +42,7 @@ def pluckentry():
             #opening file for writing
             csv_data = csv.reader(open(file_path))
             for row in csv_data:
-                  col = (Date,Job_ID,Sec_ID,Squ_ID,Mnd_Val,Area_Val,GL_Val,Pluck_Int)
-                  val = ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])},{int(row[4])},{int(row[5])},{int(row[6])},{int(row[7])},{int(row[8])})
-                  query = f'''Insert Into FieldEntry {col} Values {val}'''
+                  query = f'''Insert Into FieldEntry (Date,Job_ID,Sec_ID,Squ_ID,Mnd_Val,Area_Val,GL_Val,Pluck_Int) Values ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])},{float(row[4])},{float(row[5])},{int(row[6])},{int(row[7])})'''
                   print(query)
                   cur.execute(query)
                   mysql.connection.commit()
@@ -67,9 +65,7 @@ def cultentry():
             #opening file for writing
             csv_data = csv.reader(open(file_path))
             for row in csv_data:
-                  col = (Date,Job_ID,Sec_ID,Squ_ID,Mnd_Val,Area_Val)
-                  val = ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])},{int(row[4])},{int(row[5])},{int(row[6])})
-                  query = f'''Insert Into FieldEntry {col} Values {val} '''
+                  query = f'''Insert Into FieldEntry (Date,Job_ID,Sec_ID,Squ_ID,Mnd_Val,Area_Val) Values ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])},{int(row[4])},{float(row[5])})'''
                   print(query)
                   cur.execute(query)
                   mysql.connection.commit()
@@ -138,7 +134,7 @@ def fuelentry():
             #opening file for writing
             csv_data = csv.reader(open(file_path))
             for row in csv_data:
-                  query = f'''Insert Into fuelentry (Date, Fuel_ID, Mach_ID, Fuel_Val) Values ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])})'''
+                  query = f'''Insert Into FuelEntry (Date, Fuel_ID, Mach_ID, Fuel_Val) Values ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])})'''
                   print(query)
                   cur.execute(query)
                   mysql.connection.commit()

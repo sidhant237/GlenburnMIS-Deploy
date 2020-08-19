@@ -15,10 +15,12 @@ def displayfactory():
       if not d1:
             d1 = "2020-08-18"
       d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
+      d01 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(days=1))).split(' ')[0] + "'"
       d1 = "'" + d1 + "'"
       d0 = "'2020-01-01'"  # start date current year
       d00 = "'2019-01-01'"  # start date last year
-      cur = mysql.connection.cursor()     
+      cur = mysql.connection.cursor()
+           
       rv = []
       ##TEA MADE
       # [TM TODAY]
@@ -39,23 +41,46 @@ def displayfactory():
       cur.execute(f'''select {val2} from {tab2} where TM_Date >= {d00} AND TM_Date <= {d11} ''')
       rv.append(cur.fetchall()[0][0])
 
-      # [RECOVERY % TODAY
-      val3 = " ROUND(SUM(FieldEntry.GL_Val)/SUM(TMEntry.TM_Val),4) * 100 "
-      tab3 = "TMEntry , FieldEntry"
-      joi3 = "(TMEntry.TM_Date = FieldEntry.Date) and (TMEntry.TM_Date="
-      cur.execute(f'''select {val3} from {tab3} where {joi3}{d1})''')
-      rv.append(cur.fetchall()[0][0])
+      #[GL YEST]
+      val3 = "sum(FieldEntry.GL_Val)"
+      tab3 = "FieldEntry"
+      cur.execute(f'''select {val3} from {tab3} where Date = {d01}''')
+      rv3 = cur.fetchall()
+      y = [i[0] for i in rv3]
 
-      # [RECOVERY % TO DATE
-      val4 = " ROUND(SUM(FieldEntry.GL_Val)/SUM(TMEntry.TM_Val),4) * 100 "
-      tab4 = 'TMEntry , FieldEntry'
-      joi4 = "(TMEntry.TM_Date = FieldEntry.DATE) and (TMEntry.TM_Date>="
-      cur.execute(f'''select {val4} from {tab4} where {joi4}{d0}) and (TMEntry.TM_Date<={d1})''')
-      rv.append(cur.fetchall()[0][0])      
+      #[TM TODAY]
+      val = "TMEntry.TM_Val "
+      tab = "TMEntry"
+      cur.execute(f'''select {val} from {tab} where TM_Date = {d1} ''')
+      rv1 = cur.fetchall()
+      x = [i[0] for i in rv1]
 
-      column_headers =  ['TMToday', 'TMToDate', 'TMToDateLY', 'RecoveryToday', 'RecoveryToDate']
+      #[GL TODATE]
+      val3 = "sum(FieldEntry.GL_Val)"
+      tab3 = "FieldEntry"
+      cur.execute(f'''select {val3} from {tab3} where Date >= {d0} and Date <= {d01}''')
+      rv4 = cur.fetchall()
+      yy = [i[0] for i in rv4]
+      
+      #[TM TODATE]
+      val1 = "sum(TMEntry.TM_Val)"
+      tab1 = "TMEntry"
+      cur.execute(f'''select {val1} from {tab1} where TM_Date >= {d0} AND TM_Date <= {d1} ''')
+      rv2 = cur.fetchall()
+      xx = [i[0] for i in rv2]
+
+      #[Recovery today]
+      z = round((x[0] / y[0])*100,2)
+      rv.append(z)
+
+      zz = round((xx[0]/yy[0])*100,2)
+      rv.append(zz)   
+
+      column_headers =  ['TMToday', 'TMTodate', 'TMTodateLY', 'RecoveryToday', 'RecoveryTodate']
+      
       json_data = []
       json_data.append(dict(zip(column_headers, rv)))
+      
 
 
 

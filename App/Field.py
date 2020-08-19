@@ -349,8 +349,8 @@ def invoicelist():
 @cross_origin()
 def get_dates():
     cur = mysql.connection.cursor()
-    cur.execute("select * from Date")
-    headers = ['table', 'start', 'end']
+    cur.execute("select * from Dates")
+    headers = ['Date']
     rv = cur.fetchall()
     json_data = []
 
@@ -358,6 +358,5 @@ def get_dates():
         if isinstance(o, datetime.date):
                 return str(o.year) + str("/") + str(o.month) + str("/") + str(o.day)
 
-    for result in rv:
-        json_data.append(dict(zip(headers, result)))
+    json_data.append(dict(zip(headers, rv)))
     return json.dumps(json_data, default=sids_converter)
