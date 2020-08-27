@@ -25,7 +25,7 @@ def cultivationdaily():
     fom = "ROUND((Mnd_Val/Area_Val),2)"
     tab = "FieldEntry,SquTab,Jobtab,SecTab,DivTab"
     joi = "FieldEntry.Squ_ID = SquTab.Squ_ID AND FieldEntry.Job_ID=Jobtab.Job_ID AND FieldEntry.Sec_ID=SecTab.Sec_ID AND DivTab.Div_ID=SecTab.Div_ID"
-    job = "(Jobtab.Job_Type = 2)"
+    job = "(Jobtab.Job_Group = 2)"
     cur.execute(f'''select {con} , {val} , {fom} from {tab} where {joi} and date >={d1} and date <={d2} and {job}''')
     rv = cur.fetchall()
 
@@ -55,7 +55,7 @@ def cultivationgroup():
     fom = "ROUND((sum(FieldEntry.Mnd_Val))/(sum(FieldEntry.Area_Val)),2)"
     tab = "FieldEntry,SquTab,Jobtab,SecTab,DivTab"
     joi = "FieldEntry.Squ_ID = SquTab.Squ_ID AND FieldEntry.Job_ID=Jobtab.Job_ID AND FieldEntry.Sec_ID=SecTab.Sec_ID AND DivTab.Div_ID=SecTab.Div_ID"
-    job = "(Jobtab.Job_Type = 2)"
+    job = "(Jobtab.Job_Group = 2)"
     cur.execute(f'''select {con} , {val} , {val1} , {fom}  from {tab} where {joi} and date >={d1} and date <={d2} and {job} group by FieldEntry.Job_ID''')
     rv = cur.fetchall()
     row_headers = ['Job_Name', 'Mandays', 'AreaCovered', 'MndArea']
@@ -79,23 +79,23 @@ def pluckingdaily():
     cur = mysql.connection.cursor()
     d1 = "'" + (str(request.args.get("start"))) + "'"
     d2 = "'" + (str(request.args.get("end"))) + "'"
-
-    con = "FieldEntry.date, DivTab.Div_Name, SecTab.Sec_Name,SquTab.Squ_Name"
+     
+    con = "FieldEntry.date, PruneTab.Prune_Name, SecTab.Sec_Name"
     val = "FieldEntry.Mnd_Val, FieldEntry.GL_Val, FieldEntry.Area_Val"
-    fom = "ROUND((GL_Val/Mnd_Val),2), ROUND((GL_Val/Area_Val),2),ROUND((Mnd_Val/Area_Val),2)"
-    con2 = "SecTab.Sec_Prune , SecTab.Sec_Jat, SecTab.Sec_Area"
-    tab = "FieldEntry,SquTab,Jobtab,SecTab,DivTab"
-    joi = "FieldEntry.Squ_ID = SquTab.Squ_ID AND FieldEntry.Job_ID=Jobtab.Job_ID AND FieldEntry.Sec_ID=SecTab.Sec_ID AND DivTab.Div_ID=SecTab.Div_ID"
+    fom = "ROUND((GL_Val/Mnd_Val),1), ROUND((GL_Val/Area_Val),1),ROUND((Mnd_Val/Area_Val),1)"
+    con2 = "FieldEntry.Pluck_Int,SquTab.Squ_Name, SecTab.Sec_Jat,SecTab.Sec_Area"
+    tab = "FieldEntry,SquTab,Jobtab,SecTab,DivTab,PruneTab"
+    joi = "FieldEntry.Squ_ID = SquTab.Squ_ID AND FieldEntry.Job_ID=Jobtab.Job_ID AND FieldEntry.Sec_ID=SecTab.Sec_ID AND DivTab.Div_ID=SecTab.Div_ID AND PruneTab.Prune_Type = SecTab.Prune_Type"
     job = "(FieldEntry.Job_ID = 1 )"
-    cur.execute(f'''select {con} , {val} , {fom} , {con2} from {tab} where {joi} and date >={d1} and date <={d2} and {job}''')
+    cur.execute(f'''select {con} , {val} , {fom} ,{con2} from {tab} where {joi} and date >={d1} and date <={d2} and {job} ORDER BY SecTab.Prune_Type DESC, (GL_Val/Area_Val) DESC ''')
 
-    row_headers = ['Date', 'Division','Section_Name', 'Squad_Name', 'Mandays', 'Greenleaf', 'AreaCovered', 'GlMnd', 'GlHa', 'MndHa','Prune','Jat', 'SecArea']
+    row_headers = ['Date', 'Prune','Section_Name', 'Mandays', 'Greenleaf', 'AreaCovered', 'GlMnd', 'GlHa', 'MndHa','PluckInt', 'Squad_Name','Jat','SecArea']
     rv = cur.fetchall()
     json_data = []
 
     def sids_converter(o):
         if isinstance(o, datetime.date):
-                return str(o.year) + str("/") + str(o.month) + str("/") + str(o.day)
+                return str(o.month) + str("/") + str(o.day)
 
     for result in rv:
         json_data.append(dict(zip(row_headers , result)))
@@ -163,12 +163,12 @@ def mandaydeployment():
     d1 = "'" + (str(request.args.get("start"))) + "'"
     d2 = "'" + (str(request.args.get("end"))) + "'"
     
-    con = "Jobtab.Job_Name"
+    con = "Jobtab.Job_Name,Jobtab.Job_ID"
     val = "SUM(FieldEntry.Mnd_Val)"
     tab = "FieldEntry,Jobtab"
     joi = "FieldEntry.Job_ID=Jobtab.Job_ID"
     cur.execute(f'''select {con} , {val} from {tab} where {joi} and date >={d1} and date <={d2} group by FieldEntry.Job_ID''')
-    row_headers = ['Job_Name', 'Mandays']
+    row_headers = ['Job_Name','JobID', 'Mandays']
 
     rv = cur.fetchall()
     json_data = []
@@ -216,16 +216,17 @@ def fuelreport():
 @cross_origin()
 def greenleaf():
     cur = mysql.connection.cursor()
-    d1 = request.args.get("start") 
-    d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
-    d1 = "'" + d1 + "'"
-
+    #d1 = request.args.get("start") 
+    #d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
+    #d1 = "'" + d1 + "'"
+    d1 = "'2020-08-26'"
+    d11 = "'2019-08-26'"
     #DIV NAME
     val = "DivTab.Div_Name"
     tab = "DivTab, SecTab, FieldEntry"
     joi = "(FieldEntry.Sec_ID=SecTab.Sec_ID) AND (SecTab.Div_ID = DivTab.Div_ID)"
     job = "FieldEntry.Job_ID = 1"
-    cur.execute(f'''select {val} from {tab} where {joi} AND {job} and date = {d1} GROUP BY SecTab.Div_ID''')
+    cur.execute(f'''select {val} from {tab} where {joi} AND {job} and date = {d1} GROUP BY DivTab.Div_ID''')
     rv = cur.fetchall()
 
     # GL TODAY
@@ -233,7 +234,7 @@ def greenleaf():
     tab1 = "DivTab, SecTab, FieldEntry"
     joi1 = "(FieldEntry.Sec_ID=SecTab.Sec_ID) AND (SecTab.Div_ID = DivTab.Div_ID)"
     job1 = "FieldEntry.Job_ID = 1"
-    cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and date = {d1} GROUP BY SecTab.Div_ID''')
+    cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and date = {d1} GROUP BY DivTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
     rv1 = cur.fetchall()
 
     #GL TODAY LAST YEA1R
@@ -241,7 +242,7 @@ def greenleaf():
     tab2 = "FieldEntry, DivTab, SecTab"
     joi2 = "(FieldEntry.Sec_ID=SecTab.Sec_ID) AND (SecTab.Div_ID = DivTab.Div_ID)"
     job2 = "FieldEntry.Job_ID = 1"
-    cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and date = {d11} GROUP BY SecTab.Div_ID''')
+    cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and date = {d11} GROUP BY DivTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
     rv2 = cur.fetchall()
 
     #FINE LEAF% TODAYS GL

@@ -442,20 +442,21 @@ Sizes: [
 																						<table class="table" style="border: 1px solid #007e4f; border-radius: 5px; padding: 5px;">
 																							<thead>
 																							<tr>
-																								<th scope="col" style="text-align: center;">Division</th>
-																								<th scope="col" style="text-align: center;">Section Name</th>
-																								<th scope="col" style="text-align: center;">Mandays</th>
-																								<th scope="col" style="text-align: center;">Greenleaf</th>
-																								<th scope="col" style="text-align: center;">Area Covered</th>
-																								<th scope="col" style="text-align: center;">GlMnd</th>
-																								<th scope="col" style="text-align: center;">GlHa</th>
-																								<th scope="col" style="text-align: center;">MndHa</th>
+																								<th scope="col" style="text-align: center;">Prune</th>
+																								<th scope="col" style="text-align: center;">Sec</th>
+																								<th scope="col" style="text-align: center;">Mnds</th>
+																								<th scope="col" style="text-align: center;">GL</th>
+																								<th scope="col" style="text-align: center;">AreaCov</th>
+																								<th scope="col" style="text-align: center;">Gl/Mnd</th>
+																								<th scope="col" style="text-align: center;">Gl/Ha</th>
+																								<th scope="col" style="text-align: center;">Mnd/Ha</th>
+																								<th scope="col" style="text-align: center;">Pluck Int</th>
 																							</tr>
 																							</thead>
 																							<tbody>
 																							{% for item in data['Plucking'] %}
 																							<tr>
-																								<td style="text-align: center;">{{ item['Division'] }}</td>
+																								<td style="text-align: center;">{{ item['Prune'] }}</td>
 																								<td style="text-align: center;">{{ item['Section_Name'] }}</td>
 																								<td style="text-align: center;">{{ item['Mandays'] }}</td>
 																								<td style="text-align: center;">{{ item['Greenleaf'] }}</td>
@@ -463,6 +464,7 @@ Sizes: [
 																								<td style="text-align: center;">{{ item['GlMnd'] }}</td>
 																								<td style="text-align: center;">{{ item['GlHa'] }}</td>
 																								<td style="text-align: center;">{{ item['MndHa'] }}</td>
+																								<td style="text-align: center;">{{ item['PluckInt'] }}</td>
 																							</tr>
 																							{% endfor %}
 																							</tbody>

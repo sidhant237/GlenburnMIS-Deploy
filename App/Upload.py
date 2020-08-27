@@ -191,6 +191,20 @@ def flentry():
 
 
 
+
+@app.route('/update-date',methods=['GET', 'POST'])
+@cross_origin()
+def update_dates():
+    date = "'" + (str(request.args.get("date"))) + "'"
+    cur = mysql.connection.cursor()
+    cur.execute(f'''UPDATE Dates SET Date={date}''')
+    mysql.connection.commit()
+
+    return json.dumps({'message': 'success'})
+
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)
 

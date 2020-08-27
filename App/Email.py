@@ -10,7 +10,8 @@ from dateutil.relativedelta import relativedelta
 @app.route('/email-report', methods=['GET', 'POST'])
 @cross_origin()
 def email():
-    email_data, current_date = email_report()
+    d1 = request.args.get("start")
+    email_data, current_date = email_report(d1)
     def sids_converter(o):
         if isinstance(o, datetime.date):
                 return str(o.year) + str("/") + str(o.month) + str("/") + str(o.day)
@@ -19,12 +20,12 @@ def email():
     return json.dumps({'message': 'success'})
 
 
-def email_report():
-    cur = mysql.connection.cursor()
-    d1 = request.args.get("start")
+def email_report(d1):
+    cur = mysql.connection.cursor()    
     if not d1:
-      d1 = '2020-08-19'
+      d1 = '2020-08-27'
     d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
+    #d01 = "'2020-08-24'"
     d01 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(days=1))).split(' ')[0] + "'"
     d1 = "'" + d1 + "'"
     d0 = "'2020-03-01'"  # start date current year
@@ -43,7 +44,7 @@ def email_report():
     tab1 = "DivTab, SecTab, FieldEntry"
     joi1 = "(FieldEntry.Sec_ID=SecTab.Sec_ID) AND (SecTab.Div_ID = DivTab.Div_ID)"
     job1 = "FieldEntry.Job_ID = 1"
-    cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and Date = {d1} GROUP BY SecTab.Div_ID''')
+    cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and Date = {d1} GROUP BY SecTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
     rv1 = cur.fetchall()
 
     #GL TODAY LAST YEA1R
@@ -51,7 +52,7 @@ def email_report():
     tab2 = "FieldEntry, DivTab, SecTab"
     joi2 = "(FieldEntry.Sec_ID=SecTab.Sec_ID) AND (SecTab.Div_ID = DivTab.Div_ID)"
     job2 = "FieldEntry.Job_ID = 1"
-    cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and Date = {d11} GROUP BY SecTab.Div_ID''')
+    cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and Date = {d11} GROUP BY SecTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
     rv2 = cur.fetchall()
 
     #FINE LEAF% TODAYS GL
@@ -143,14 +144,14 @@ def email_report():
 
     cur = mysql.connection.cursor()
     
-    con = "Jobtab.JOB_NAME"
+    con = "JobType.JobType_Name"
     val = "SUM(FieldEntry.Mnd_Val)"
-    tab = "FieldEntry,Jobtab"
-    joi = "FieldEntry.Job_ID=Jobtab.Job_ID"
-    cur.execute(f'''select {con} , {val} from {tab} where {joi} and date >={d1} group by FieldEntry.Job_ID''')
+    tab = "FieldEntry,Jobtab,JobType"
+    joi = "FieldEntry.Job_ID=Jobtab.Job_ID And Jobtab.Job_Type=JobType.Job_Type"
+    cur.execute(f'''select {con} , {val} from {tab} where {joi} and date >={d1} group by JobType.JobType_Name order by sum(FieldEntry.Mnd_Val) DESC ''')
     row_headers = ['Job_Name', 'Mandays']
 
-    rv = cur.fetchmany(7)
+    rv = cur.fetchall()
     json_data2 = []
 
     def sids_converter(o):
@@ -164,27 +165,32 @@ def email_report():
 ################PLUCKDAILY
 #3
 
-    cur = mysql.connection.cursor()
     
-    con = "DivTab.Div_name, SecTab.Sec_Name"
-    val = "FieldEntry.Mnd_Val, FieldEntry.GL_Val, FieldEntry.Area_Val"
-    fom = "ROUND((GL_Val/Mnd_Val),2), ROUND((GL_Val/Area_Val),2),ROUND((Mnd_Val/Area_Val),2)"
-    tab = "FieldEntry,SquTab,Jobtab,SecTab,DivTab"
-    joi = "FieldEntry.Squ_ID = SquTab.Squ_ID AND FieldEntry.Job_ID=Jobtab.Job_ID AND FieldEntry.Sec_ID=SecTab.Sec_ID AND DivTab.Div_ID=SecTab.Div_ID"
-    job = "(FieldEntry.Job_ID = 1 )"
-    cur.execute(f'''select {con} , {val} , {fom} from {tab} where {joi} and date ={d1} and {job}''')
 
-    row_headers = ['Division','Section_Name', 'Mandays', 'Greenleaf', 'AreaCovered', 'GlMnd', 'GlHa', 'MndHa']
+##################
+#test
+    cur = mysql.connection.cursor()
+
+    con = "PruneTab.Prune_Name, SecTab.Sec_Name"
+    val = "FieldEntry.Mnd_Val, FieldEntry.GL_Val, FieldEntry.Area_Val"
+    fom = "ROUND((GL_Val/Mnd_Val),1), ROUND((GL_Val/Area_Val),1),ROUND((Mnd_Val/Area_Val),1)"
+    con2 = "FieldEntry.Pluck_Int"
+    tab = "FieldEntry,SquTab,Jobtab,SecTab,DivTab,PruneTab"
+    joi = "FieldEntry.Squ_ID = SquTab.Squ_ID AND FieldEntry.Job_ID=Jobtab.Job_ID AND FieldEntry.Sec_ID=SecTab.Sec_ID AND DivTab.Div_ID=SecTab.Div_ID AND PruneTab.Prune_Type = SecTab.Prune_Type"
+    job = "(FieldEntry.Job_ID = 1 )"
+    cur.execute(f'''select {con} , {val} , {fom} ,{con2} from {tab} where {joi} and date= {d1} and {job} ORDER BY SecTab.Prune_Type DESC, (GL_Val/Area_Val) DESC ''')
+
+    row_headers = ['Prune','Section_Name', 'Mandays', 'Greenleaf', 'AreaCovered', 'GlMnd', 'GlHa', 'MndHa','PluckInt']
     rv = cur.fetchall()
     json_data3 = []
 
-
     def sids_converter(o):
-            if isinstance(o, datetime.date):
-                  return str(o.year) + str("/") + str(o.month) + str("/") + str(o.day)
+        if isinstance(o, datetime.date):
+                return str(o.month) + str("/") + str(o.day)
 
     for result in rv:
-            json_data3.append(dict(zip(row_headers , result)))
+        json_data3.append(dict(zip(row_headers , result)))
+    
 
 
 
@@ -199,7 +205,7 @@ def email_report():
     fom = "ROUND((Mnd_Val/Area_Val),2)"   
     tab = "FieldEntry,SquTab,Jobtab,SecTab,DivTab"
     joi = "FieldEntry.Squ_ID = SquTab.Squ_ID AND FieldEntry.Job_ID=Jobtab.Job_ID AND FieldEntry.Sec_ID=SecTab.Sec_ID AND DivTab.Div_ID=SecTab.Div_ID"
-    job = "(FieldEntry.Job_ID = 2 or FieldEntry.Job_ID = 3 or FieldEntry.Job_ID = 4)"
+    job = "(Jobtab.Job_Group = 2)"
     cur.execute(f'''select {con} , {val} , {fom} from {tab} where {joi} and date ={d1} and {job}''')
     rv = cur.fetchall()
 
@@ -217,27 +223,27 @@ def email_report():
 
 ######################
 #GRADE%
-#10##
+#10## GRADE PER FACTORY
 
     cur = mysql.connection.cursor()
 
-    #SUM-ALLGRADES-DATERANGE
-    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry WHERE date ={d1} ")
+    #SUM-ALLGRADES-TODATE
+    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry WHERE date >= {d0} and date <={d1} ")
     rv = cur.fetchall()
 
-          #SUM-ALLGRADES-DATE
+        #SUM-ALLGRADES-DATE
     cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry WHERE date ={d1} ")
     rv3 = cur.fetchall()
 
-          #SUM-PERGRADE-DATERANGE
-    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} group by TeaGradeTab.TeaGrade_ID")
+        #SUM-PERGRADE-DATERANGE
+    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date >= {d0} and date <={d1} group by TeaGradeTab.TeaGrade_ID")
     rv1 = cur.fetchall()
 
-          #PERGRADE-DATE
+        #PERGRADE-DATE
     cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} group by TeaGradeTab.TeaGrade_ID ")
     rv4 = cur.fetchall()      
 
-          #GRADE-NAME
+        #GRADE-NAME
     cur.execute(f"SELECT TeaGradeTab.TeaGrade_Name FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1}")
     rv2 = cur.fetchall()
 
@@ -249,11 +255,11 @@ def email_report():
 
     z = []
     for number in y:
-          z.append((round((number / x[0]),2)*100))
+        z.append((round((number / x[0]),4)*100))
 
     zz = []
     for number in yy:
-          zz.append((round((number / xx[0]),2)*100))
+        zz.append((round((number / xx[0]),4)*100))
 
     zzz = zip(w,zz,z)
 
@@ -261,7 +267,7 @@ def email_report():
     column_headers = ['Grade','PercentToday','PercentTodate']
 
     for row in zzz:
-          json_data5.append(dict(zip(column_headers,row)))
+        json_data5.append(dict(zip(column_headers,row)))
     
 
     ############
@@ -269,7 +275,7 @@ def email_report():
     cur = mysql.connection.cursor()
 
     con = " MachineTab.MACH_NAME"
-    fom = " sum(FuelEntry.Fuel_Val), sum(TM_Val), ROUND((SUM(TM_Val)/sum(FuelEntry.Fuel_Val)),2)"
+    fom = " sum(FuelEntry.Fuel_Val), sum(TM_Val), ROUND((SUM(FuelEntry.Fuel_Val)/sum(TMEntry.TM_Val)),2)"
     tab = "FuelEntry, MachineTab, FuelTab, TMEntry"
     joi = "FuelEntry.Fuel_ID = FuelTab.Fuel_ID AND FuelEntry.Mach_ID = MachineTab.Mach_ID AND TMEntry.TM_Date = FuelEntry.Date"
     cur.execute(f'''select {con} , {fom}  from {tab} where {joi} and Date = {d1} group by MachineTab.MACH_NAME''')
@@ -303,7 +309,8 @@ def email_report():
 def send_mail(email_data, current_date):
     current_date = datetime.datetime.strptime(current_date[1:11], '%Y-%m-%d')
     subject = "Garden Report " + current_date.strftime('%b %d %Y') 
-    recipients = ['sidhant237@gmail.com'] # 'sidhant237@gmail.com' 
+    #recipients = ['spteaplanter@gmail.com','anshuman239@gmail.com','palzolama@gmail.com','alokeroytea@gmail.com','glenburn1859@yahoo.co.in','sidhant237@gmail.com'] # 'sidhant237@gmail.com' 
+    recipients = ['sidhant237@gmail.com']
     body = "Good Day, \n\n Your Daily report file is here. \n\n Thank you."
     msg = Message(subject=subject, body=body, recipients=recipients, sender="from@example.com")
     msg.html = render_template('index.html', data = email_data, date=current_date)

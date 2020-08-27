@@ -32,7 +32,7 @@ def dailyreport():
     tab1 = "DivTab, SecTab, FieldEntry"
     joi1 = "(FieldEntry.Sec_ID=SecTab.Sec_ID) AND (SecTab.Div_ID = DivTab.Div_ID)"
     job1 = "FieldEntry.Job_ID = 1"
-    cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and Date = {d1} GROUP BY SecTab.Div_ID''')
+    cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and Date = {d1} GROUP BY SecTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
     rv1 = cur.fetchall()
 
     #GL TODAY LAST YEA1R
@@ -40,7 +40,7 @@ def dailyreport():
     tab2 = "FieldEntry, DivTab, SecTab"
     joi2 = "(FieldEntry.Sec_ID=SecTab.Sec_ID) AND (SecTab.Div_ID = DivTab.Div_ID)"
     job2 = "FieldEntry.Job_ID = 1"
-    cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and Date = {d11} GROUP BY SecTab.Div_ID''')
+    cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and Date = {d11} GROUP BY SecTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
     rv2 = cur.fetchall()
 
     #FINE LEAF% TODAYS GL
@@ -132,11 +132,11 @@ def dailyreport():
 
     cur = mysql.connection.cursor()
     
-    con = "Jobtab.JOB_NAME"
+    con = "JobType.JobType_Name"
     val = "SUM(FieldEntry.Mnd_Val)"
-    tab = "FieldEntry,Jobtab"
-    joi = "FieldEntry.Job_ID=Jobtab.Job_ID"
-    cur.execute(f'''select {con} , {val} from {tab} where {joi} and date >={d1} group by FieldEntry.Job_ID''')
+    tab = "FieldEntry,Jobtab,JobType"
+    joi = "FieldEntry.Job_ID=Jobtab.Job_ID And Jobtab.Job_Type=JobType.Job_Type"
+    cur.execute(f'''select {con} , {val} from {tab} where {joi} and date >={d1} group by JobType.JobType_Name order by sum(FieldEntry.Mnd_Val) DESC ''')
     row_headers = ['Job_Name', 'Mandays']
 
     rv = cur.fetchall()
@@ -189,7 +189,7 @@ def dailyreport():
     fom = "ROUND((Mnd_Val/Area_Val),2)"   
     tab = "FieldEntry,SquTab,Jobtab,SecTab,DivTab"
     joi = "FieldEntry.Squ_ID = SquTab.Squ_ID AND FieldEntry.Job_ID=Jobtab.Job_ID AND FieldEntry.Sec_ID=SecTab.Sec_ID AND DivTab.Div_ID=SecTab.Div_ID"
-    job = "(FieldEntry.Job_ID = 2 or FieldEntry.Job_ID = 3 or FieldEntry.Job_ID = 4)"
+    job = "(Jobtab.Job_Group = 2)"
     cur.execute(f'''select {con} , {val} , {fom} from {tab} where {joi} and date ={d1} and {job}''')
     rv = cur.fetchall()
 
@@ -206,28 +206,27 @@ def dailyreport():
 
 
 ######################
-#GRADE%
-#10##
+## GRADE PER FACTORY
 
     cur = mysql.connection.cursor()
 
-    #SUM-ALLGRADES-DATERANGE
-    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry WHERE date ={d1} ")
+    #SUM-ALLGRADES-TODATE
+    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry WHERE date >= {d0} and date <={d1} ")
     rv = cur.fetchall()
 
-          #SUM-ALLGRADES-DATE
+        #SUM-ALLGRADES-DATE
     cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry WHERE date ={d1} ")
     rv3 = cur.fetchall()
 
-          #SUM-PERGRADE-DATERANGE
-    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} group by TeaGradeTab.TeaGrade_ID")
+        #SUM-PERGRADE-DATERANGE
+    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date >= {d0} and date <={d1} group by TeaGradeTab.TeaGrade_ID")
     rv1 = cur.fetchall()
 
-          #PERGRADE-DATE
+        #PERGRADE-DATE
     cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} group by TeaGradeTab.TeaGrade_ID ")
     rv4 = cur.fetchall()      
 
-          #GRADE-NAME
+        #GRADE-NAME
     cur.execute(f"SELECT TeaGradeTab.TeaGrade_Name FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1}")
     rv2 = cur.fetchall()
 
@@ -239,11 +238,11 @@ def dailyreport():
 
     z = []
     for number in y:
-          z.append((round((number / x[0]),2)*100))
+        z.append((round((number / x[0]),4)*100))
 
     zz = []
     for number in yy:
-          zz.append((round((number / xx[0]),2)*100))
+        zz.append((round((number / xx[0]),4)*100))
 
     zzz = zip(w,zz,z)
 
@@ -251,7 +250,7 @@ def dailyreport():
     column_headers = ['Grade','PercentToday','PercentTodate']
 
     for row in zzz:
-          json_data5.append(dict(zip(column_headers,row)))
+        json_data5.append(dict(zip(column_headers,row)))
     
 
     ############
@@ -259,7 +258,7 @@ def dailyreport():
     cur = mysql.connection.cursor()
 
     con = " MachineTab.MACH_NAME"
-    fom = " sum(FuelEntry.Fuel_Val), sum(TM_Val), ROUND((SUM(TM_Val)/sum(FuelEntry.Fuel_Val)),2)"
+    fom = " sum(FuelEntry.Fuel_Val), sum(TM_Val), ROUND((SUM(FuelEntry.Fuel_Val)/sum(TM_Val)),2)"
     tab = "FuelEntry, MachineTab, FuelTab, TMEntry"
     joi = "FuelEntry.Fuel_ID = FuelTab.Fuel_ID AND FuelEntry.Mach_ID = MachineTab.Mach_ID AND TMEntry.TM_Date = FuelEntry.Date"
     cur.execute(f'''select {con} , {fom}  from {tab} where {joi} and Date = {d1} group by MachineTab.MACH_NAME''')
