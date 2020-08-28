@@ -6,6 +6,15 @@ from flask_mail import Message
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 
+
+@app.template_filter('total')
+def total(data, column):
+    total = 0
+    print(data)
+    for item in data:
+        total += item[column]
+    return total
+
 #9m
 @app.route('/email-report', methods=['GET', 'POST'])
 @cross_origin()
@@ -23,7 +32,7 @@ def email():
 def email_report(d1):
     cur = mysql.connection.cursor()    
     if not d1:
-      d1 = '2020-08-27'
+      d1 = '2020-08-28'
     d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
     #d01 = "'2020-08-24'"
     d01 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(days=1))).split(' ')[0] + "'"
@@ -55,6 +64,22 @@ def email_report(d1):
     cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and Date = {d11} GROUP BY SecTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
     rv2 = cur.fetchall()
 
+    # GL TODATE
+    val1 = "SUM(FieldEntry.GL_Val)"
+    tab1 = "DivTab, SecTab, FieldEntry"
+    joi1 = "(FieldEntry.Sec_ID=SecTab.Sec_ID) AND (SecTab.Div_ID = DivTab.Div_ID)"
+    job1 = "FieldEntry.Job_ID = 1"
+    cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and Date >= {d0} and Date <= {d1} GROUP BY SecTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
+    rv4 = cur.fetchall()
+
+    #GL TODATE LAST YEA1R
+    val2 = "sum(FieldEntry.GL_Val)"
+    tab2 = "FieldEntry, DivTab, SecTab"
+    joi2 = "(FieldEntry.Sec_ID=SecTab.Sec_ID) AND (SecTab.Div_ID = DivTab.Div_ID)"
+    job2 = "FieldEntry.Job_ID = 1"
+    cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and Date >= {d00} and Date <= {d11} GROUP BY DivTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
+    rv5 = cur.fetchall()
+    
     #FINE LEAF% TODAYS GL
     val3 = "sum(FL_Per)"
     tab3 = "FLEntry, DivTab"
@@ -62,14 +87,24 @@ def email_report(d1):
     cur.execute(f'''select {val3} from {tab3} where {joi3} and Date = {d1} GROUP BY DivTab.Div_ID''')
     rv3 = cur.fetchall()
 
+    #FINE LEAF% TODAYS GL LY
+    val3 = "sum(FL_Per)"
+    tab3 = "FLEntry, DivTab"
+    joi3 = "(FLEntry.Div_ID = DivTab.Div_ID)"
+    cur.execute(f'''select {val3} from {tab3} where {joi3} and Date = {d11} GROUP BY DivTab.Div_ID''')
+    rv6 = cur.fetchall()
+
     w = [i[0] for i in rv]
     x = [i1[0] for i1 in rv1]
     y = [i2[0] for i2 in rv2]
     z = [i3[0] for i3 in rv3]
+    a = [i3[0] for i3 in rv4]
+    b = [i3[0] for i3 in rv5]
+    c = [i3[0] for i3 in rv6] 
     
-    q = zip(w,x,y,z)
+    q = zip(w,x,y,a,b,z,c)
     json_data = []
-    column_headers = ['Division','GLToday','GLTodayLY','FineLeaf']
+    column_headers = ['Division','GLToday','GLTodayLY','GLTodate','GLTodateLY','FineLeaf','FineLeafLY']
 
     for row in q:
         json_data.append(dict(zip(column_headers, row)))
@@ -97,6 +132,23 @@ def email_report(d1):
     tab2 = "TMEntry"
     cur.execute(f'''select {val2} from {tab2} where TM_Date >= {d00} AND TM_Date <= {d11} ''')
     rv.append(cur.fetchall()[0][0])
+
+    # [TM TODATE] -- For difference
+    val1 = "sum(TMEntry.TM_Val)"
+    tab1 = "TMEntry"
+    cur.execute(f'''select {val1} from {tab1} where TM_Date >= {d0} AND TM_Date <= {d1} ''')
+    rv8 = cur.fetchall()
+
+    # [TM TODATE LAST YEAR] -- For difference
+    val2 = "sum(TMEntry.TM_Val)"
+    tab2 = "TMEntry"
+    cur.execute(f'''select {val2} from {tab2} where TM_Date >= {d00} AND TM_Date <= {d11} ''')
+    rv9 = cur.fetchall()
+
+    a = [i[0] for i in rv8]
+    b = [i[0] for i in rv9]
+    c = a[0] - b[0]
+    rv.append(c)
 
     #[GL YEST]
     val3 = "sum(FieldEntry.GL_Val)"
@@ -133,7 +185,7 @@ def email_report(d1):
     zz = round((xx[0]/yy[0])*100,2)
     rv.append(zz)   
 
-    column_headers =  ['TMToday', 'TMTodate', 'TMTodateLY', 'RecoveryToday', 'RecoveryTodate']
+    column_headers =  ['TMToday', 'TMTodate', 'TMTodateLY','Difference', 'RecoveryToday', 'RecoveryTodate']
     
     json_data1 = []
     json_data1.append(dict(zip(column_headers, rv)))
@@ -309,8 +361,8 @@ def email_report(d1):
 def send_mail(email_data, current_date):
     current_date = datetime.datetime.strptime(current_date[1:11], '%Y-%m-%d')
     subject = "Garden Report " + current_date.strftime('%b %d %Y') 
-    #recipients = ['spteaplanter@gmail.com','anshuman239@gmail.com','palzolama@gmail.com','alokeroytea@gmail.com','glenburn1859@yahoo.co.in','sidhant237@gmail.com'] # 'sidhant237@gmail.com' 
-    recipients = ['sidhant237@gmail.com']
+    recipients = ['spteaplanter@gmail.com','anshuman239@gmail.com','palzolama@gmail.com','alokeroytea@gmail.com','glenburn1859@yahoo.co.in','sidhant237@gmail.com'] # 'sidhant237@gmail.com' 
+    #recipients = ['sidhant237@gmail.com']
     body = "Good Day, \n\n Your Daily report file is here. \n\n Thank you."
     msg = Message(subject=subject, body=body, recipients=recipients, sender="from@example.com")
     msg.html = render_template('index.html', data = email_data, date=current_date)
