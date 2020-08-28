@@ -387,6 +387,12 @@ Sizes: [
 																								<td style="text-align: center;">{{ item['FineLeaf'] }}</td>
 																							</tr>
 																							{% endfor %}
+																							<tr style="border: 1px solid #007e4f; font-weight: bold;">
+																								<td style="text-align: center;">Total</td>
+																								<td style="text-align: center;">{{ data['Greenleaf'] | total(column='GLToday') }}</td>
+																								<td style="text-align: center;">{{ data['Greenleaf'] | total(column='GLTodayLY') }}</td>
+																								<td style="text-align: center;">{{ data['Greenleaf'] | total(column='FineLeaf')  }}</td>
+																							</tr>
 																							</tbody>
 																						</table>
 																					</div>

@@ -6,6 +6,16 @@ from flask_mail import Message
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 
+
+
+@app.template_filter('total')
+def total(data, column):
+    total = 0
+    print(data)
+    for item in data:
+        total += item[column]
+    return total
+
 #9m
 @app.route('/email-report', methods=['GET', 'POST'])
 @cross_origin()
@@ -23,7 +33,7 @@ def email_report():
     cur = mysql.connection.cursor()
     d1 = request.args.get("start")
     if not d1:
-      d1 = '2020-08-19'
+      d1 = '2020-08-26'
     d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
     d01 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(days=1))).split(' ')[0] + "'"
     d1 = "'" + d1 + "'"
