@@ -95,12 +95,14 @@ def email_report(d1):
     rv6 = cur.fetchall()
 
     w = [i[0] for i in rv]
-    x = [i1[0] for i1 in rv1]
-    y = [i2[0] for i2 in rv2]
-    z = [i3[0] for i3 in rv3]
-    a = [i3[0] for i3 in rv4]
-    b = [i3[0] for i3 in rv5]
-    c = [i3[0] for i3 in rv6] 
+    x = [int(i1[0]) for i1 in rv1]
+    y = [int(i2[0]) for i2 in rv2]
+    z = [int(i3[0]) for i3 in rv3]
+    a = [int(i3[0]) for i3 in rv4]
+    b = [int(i3[0]) for i3 in rv5]
+    c = [int(i3[0]) for i3 in rv6] 
+    
+    
     
     q = zip(w,x,y,a,b,z,c)
     json_data = []
@@ -110,28 +112,27 @@ def email_report(d1):
         json_data.append(dict(zip(column_headers, row)))
     
 
-#8 TEAMADE##############
-
+    #8 TEAMADE##############
     cur = mysql.connection.cursor()
+    
     rv = []
-
     # [TM TODAY]
     val = "TMEntry.TM_Val "
     tab = "TMEntry"
     cur.execute(f'''select {val} from {tab} where TM_Date = {d1} ''')
-    rv.append(cur.fetchall()[0][0])
+    rv.append(int(cur.fetchall()[0][0]))
 
     # [TM TODATE]
     val1 = "sum(TMEntry.TM_Val)"
     tab1 = "TMEntry"
     cur.execute(f'''select {val1} from {tab1} where TM_Date >= {d0} AND TM_Date <= {d1} ''')
-    rv.append(cur.fetchall()[0][0])
+    rv.append(int(cur.fetchall()[0][0]))
 
     # [TM TODATE LAST YEAR]
     val2 = "sum(TMEntry.TM_Val)"
     tab2 = "TMEntry"
     cur.execute(f'''select {val2} from {tab2} where TM_Date >= {d00} AND TM_Date <= {d11} ''')
-    rv.append(cur.fetchall()[0][0])
+    rv.append(int(cur.fetchall()[0][0]))
 
     # [TM TODATE] -- For difference
     val1 = "sum(TMEntry.TM_Val)"
@@ -147,7 +148,7 @@ def email_report(d1):
 
     a = [i[0] for i in rv8]
     b = [i[0] for i in rv9]
-    c = a[0] - b[0]
+    c = int(a[0] - b[0])
     rv.append(c)
 
     #[GL YEST]
@@ -155,28 +156,28 @@ def email_report(d1):
     tab3 = "FieldEntry"
     cur.execute(f'''select {val3} from {tab3} where Date = {d01}''')
     rv3 = cur.fetchall()
-    y = [i[0] for i in rv3]
+    y = [int(i[0]) for i in rv3]
 
     #[TM TODAY]
     val = "TMEntry.TM_Val "
     tab = "TMEntry"
     cur.execute(f'''select {val} from {tab} where TM_Date = {d1} ''')
     rv1 = cur.fetchall()
-    x = [i[0] for i in rv1]
+    x = [int(i[0]) for i in rv1]
 
     #[GL TODATE]
     val3 = "sum(FieldEntry.GL_Val)"
     tab3 = "FieldEntry"
     cur.execute(f'''select {val3} from {tab3} where Date >= {d0} and Date <= {d01}''')
     rv4 = cur.fetchall()
-    yy = [i[0] for i in rv4]
+    yy = [int(i[0]) for i in rv4]
     
     #[TM TODATE]
     val1 = "sum(TMEntry.TM_Val)"
     tab1 = "TMEntry"
     cur.execute(f'''select {val1} from {tab1} where TM_Date >= {d0} AND TM_Date <= {d1} ''')
     rv2 = cur.fetchall()
-    xx = [i[0] for i in rv2]
+    xx = [int(i[0]) for i in rv2]
 
     #[Recovery today]
     z = round((x[0] / y[0])*100,2)
@@ -361,8 +362,8 @@ def email_report(d1):
 def send_mail(email_data, current_date):
     current_date = datetime.datetime.strptime(current_date[1:11], '%Y-%m-%d')
     subject = "Garden Report " + current_date.strftime('%b %d %Y') 
-    recipients = ['spteaplanter@gmail.com','anshuman239@gmail.com','palzolama@gmail.com','alokeroytea@gmail.com','glenburn1859@yahoo.co.in','sidhant237@gmail.com'] # 'sidhant237@gmail.com' 
-    #recipients = ['sidhant237@gmail.com']
+    #recipients = ['spteaplanter@gmail.com','anshuman239@gmail.com','palzolama@gmail.com','alokeroytea@gmail.com','glenburn1859@yahoo.co.in','sidhant237@gmail.com'] # 'sidhant237@gmail.com' 
+    recipients = ['sidhant237@gmail.com']
     body = "Good Day, \n\n Your Daily report file is here. \n\n Thank you."
     msg = Message(subject=subject, body=body, recipients=recipients, sender="from@example.com")
     msg.html = render_template('index.html', data = email_data, date=current_date)

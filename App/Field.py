@@ -167,7 +167,7 @@ def mandaydeployment():
     val = "SUM(FieldEntry.Mnd_Val)"
     tab = "FieldEntry,Jobtab"
     joi = "FieldEntry.Job_ID=Jobtab.Job_ID"
-    cur.execute(f'''select {con} , {val} from {tab} where {joi} and date >={d1} and date <={d2} group by FieldEntry.Job_ID''')
+    cur.execute(f'''select {con} , {val} from {tab} where {joi} and date >={d1} and date <={d2} group by FieldEntry.Job_ID ORDER BY sum(FieldEntry.Mnd_Val) DESC''')
     row_headers = ['Job_Name','JobID', 'Mandays']
 
     rv = cur.fetchall()

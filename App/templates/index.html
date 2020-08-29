@@ -488,6 +488,17 @@ Sizes: [
 																								<td style="text-align: center;">{{ item['PluckInt'] }}</td>
 																							</tr>
 																							{% endfor %}
+																							<tr style="border: 1px solid #007e4f; font-weight: bold;">
+																								<td style="text-align: center;">Total</td>
+																								<td style="text-align: center;"></td>
+																								<td style="text-align: center;">{{ data['Plucking'] | total(column='Mandays') }}</td>
+																								<td style="text-align: center;">{{ data['Plucking'] | total(column='Greenleaf') }}</td>
+																								<td style="text-align: center;">{{ data['Plucking'] | total(column='AreaCovered') }}</td>
+																								<td style="text-align: center;"></td>
+																								<td style="text-align: center;"></td>
+																								<td style="text-align: center;"></td>
+																								<td style="text-align: center;"></td>
+																							</tr>
 																							</tbody>
 																						</table>
 																					</div>
