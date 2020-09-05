@@ -12,7 +12,7 @@ def dailyreport():
     cur = mysql.connection.cursor()
     d1 = request.args.get("start")
     if not d1:
-      d1 = '2020-08-27'
+      d1 = '2020-09-01'
     d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
     d01 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(days=1))).split(' ')[0] + "'"
     d1 = "'" + d1 + "'"
@@ -179,7 +179,7 @@ def dailyreport():
     val = "SUM(FieldEntry.Mnd_Val)"
     tab = "FieldEntry,Jobtab,JobType"
     joi = "FieldEntry.Job_ID=Jobtab.Job_ID And Jobtab.Job_Type=JobType.Job_Type"
-    cur.execute(f'''select {con} , {val} from {tab} where {joi} and date >={d1} group by JobType.JobType_Name order by sum(FieldEntry.Mnd_Val) DESC ''')
+    cur.execute(f'''select {con} , {val} from {tab} where {joi} and date ={d1} group by JobType.JobType_Name order by sum(FieldEntry.Mnd_Val) DESC ''')
     row_headers = ['Job_Name', 'Mandays']
 
     rv = cur.fetchall()
