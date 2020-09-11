@@ -6,13 +6,33 @@ from flask_mail import Message
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 
-@app.route('/test', methods=['GET', 'POST'])
-@cross_origin()
 
-def test():
+@app.template_filter('total')
+def total(data, column):
+    total = 0
+    print(data)
+    for item in data:
+        total += item[column]
+    return total
+
+#9m
+@app.route('/email-report', methods=['GET', 'POST'])
+@cross_origin()
+def email():
+    d1 = request.args.get("start")
+    email_data, current_date = email_report(d1)
+    def sids_converter(o):
+        if isinstance(o, datetime.date):
+                return str(o.year) + str("/") + str(o.month) + str("/") + str(o.day)
+
+    send_mail(email_data, current_date)
+    return json.dumps({'message': 'success'})
+
+
+def email_report(d1):
     cur = mysql.connection.cursor()
     d1 = "'2020-08-25'"
-    d2 = "'2020-09-02'"
+    d2 = "'2020-08-30'"
 
     # UP LIMIT
     con = "ROUND((sum(GL_Val)/sum(Mnd_Val)),1)"
@@ -112,7 +132,19 @@ def test():
     returndata['UPOutlier'] = upoutlier
     returndata['DSOutlier'] = dsoutlier
     returndata['CAOutlier'] = caoutlier
-    returndata['UPave'] = uplimit
-    returndata['DSave'] = dslimit
-    returndata['CAave'] = calimit
-    return json.dumps(returndata)
+    
+    return returndata, d1
+
+
+
+
+def send_mail(email_data, current_date):
+    current_date = datetime.datetime.strptime(current_date[1:11], '%Y-%m-%d')
+    subject = "Plucking Limit Report " + current_date.strftime('%b %d %Y') 
+    #recipients = ['spteaplanter@gmail.com','anshuman239@gmail.com','palzolama@gmail.com','alokeroytea@gmail.com','glenburn1859@yahoo.co.in','sidhant237@gmail.com'] # 'sidhant237@gmail.com' 
+    recipients = ['sidhant237@gmail.com']
+    body = "Good Day, \n\n Your Daily report file is here. \n\n Thank you."
+    msg = Message(subject=subject, body=body, recipients=recipients, sender="from@example.com")
+    msg.html = render_template('index2.html', data = email_data, date=current_date)
+ 
+    return mail.send(msg)

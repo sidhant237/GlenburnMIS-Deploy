@@ -32,7 +32,7 @@ def email():
 def email_report(d1):
     cur = mysql.connection.cursor()    
     if not d1:
-      d1 = '2020-09-03'
+      d1 = '2020-09-10'
     d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
     #d01 = "'2020-08-24'"
     d01 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(days=1))).split(' ')[0] + "'"
@@ -289,11 +289,11 @@ def email_report(d1):
     rv3 = cur.fetchall()
 
         #SUM-PERGRADE-DATERANGE
-    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date >= {d0} and date <={d1} group by TeaGradeTab.TeaGrade_ID")
+    cur.execute(f"SELECT ROUND(SUM(SortEntry.Sort_Kg),2) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date >= {d0} and date <={d1} group by TeaGradeTab.TeaGrade_ID")
     rv1 = cur.fetchall()
 
         #PERGRADE-DATE
-    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} group by TeaGradeTab.TeaGrade_ID ")
+    cur.execute(f"SELECT ROUND(SUM(SortEntry.Sort_Kg),2) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} group by TeaGradeTab.TeaGrade_ID ")
     rv4 = cur.fetchall()      
 
         #GRADE-NAME
@@ -362,8 +362,8 @@ def email_report(d1):
 def send_mail(email_data, current_date):
     current_date = datetime.datetime.strptime(current_date[1:11], '%Y-%m-%d')
     subject = "Garden Report " + current_date.strftime('%b %d %Y') 
-    recipients = ['spteaplanter@gmail.com','anshuman239@gmail.com','palzolama@gmail.com','alokeroytea@gmail.com','glenburn1859@yahoo.co.in','sidhant237@gmail.com'] # 'sidhant237@gmail.com' 
-    #recipients = ['sidhant237@gmail.com']
+    #recipients = ['spteaplanter@gmail.com','anshuman239@gmail.com','palzolama@gmail.com','alokeroytea@gmail.com','glenburn1859@yahoo.co.in','sidhant237@gmail.com'] # 'sidhant237@gmail.com' 
+    recipients = ['sidhant237@gmail.com']
     body = "Good Day, \n\n Your Daily report file is here. \n\n Thank you."
     msg = Message(subject=subject, body=body, recipients=recipients, sender="from@example.com")
     msg.html = render_template('index.html', data = email_data, date=current_date)

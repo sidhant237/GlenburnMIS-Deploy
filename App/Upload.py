@@ -19,7 +19,7 @@ def upload_csv_file():
             #opening file for writing
             csv_data = csv.reader(open(file_path))
             for row in csv_data:
-                  query = f'''INSERT INTO fuelentry (Date, Fuel_ID, Mach_ID, Fuel_Val) VALUES ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])})'''
+                  query = f'''INSERT INTO fieldentry (Date, fieldentry.GL_Val, Job_ID, Sec_ID) VALUES ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])})'''
                   print(query)
                   cur.execute(query)
                   mysql.connection.commit()
@@ -65,7 +65,8 @@ def cultentry():
             #opening file for writing
             csv_data = csv.reader(open(file_path))
             for row in csv_data:
-                  query = f'''Insert Into FieldEntry (Date,Job_ID,Sec_ID,Squ_ID,Mnd_Val,Area_Val) Values ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])},{int(row[4])},{float(row[5])})'''
+                  query = f'''INSERT INTO FieldEntry (FieldEntry.Date, FieldEntry.GL_Val, FieldEntry.Job_ID, FieldEntry.Sec_ID) VALUES ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])})'''
+                  #query = f'''Insert Into FieldEntry (Date,Job_ID,Sec_ID,Squ_ID,Mnd_Val,Area_Val) Values ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])},{int(row[4])},{float(row[5])})'''
                   print(query)
                   cur.execute(query)
                   mysql.connection.commit()

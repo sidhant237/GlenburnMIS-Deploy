@@ -219,8 +219,8 @@ def greenleaf():
     #d1 = request.args.get("start") 
     #d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
     #d1 = "'" + d1 + "'"
-    d1 = "'2020-08-26'"
-    d11 = "'2019-08-26'"
+    d1 = "'2020-09-09'"
+    d11 = "'2020-09-09'"
     #DIV NAME
     val = "DivTab.Div_Name"
     tab = "DivTab, SecTab, FieldEntry"
