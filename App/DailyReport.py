@@ -12,7 +12,7 @@ def dailyreport():
     cur = mysql.connection.cursor()
     d1 = request.args.get("start")
     if not d1:
-      d1 = '2020-09-01'
+      d1 = '2020-09-06'
     d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
     d01 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(days=1))).split(' ')[0] + "'"
     d1 = "'" + d1 + "'"
@@ -24,7 +24,7 @@ def dailyreport():
     tab = "DivTab, SecTab, FieldEntry"
     joi = "(FieldEntry.Sec_ID=SecTab.Sec_ID) AND (SecTab.Div_ID = DivTab.Div_ID)"
     job = "FieldEntry.Job_ID = 1"
-    cur.execute(f'''select {val} from {tab} where {joi} AND {job} and date = {d1} GROUP BY SecTab.Div_ID''')
+    cur.execute(f'''select {val} from {tab} where {joi} AND {job}  GROUP BY SecTab.Div_ID''') #and date = {d1}
     rv = cur.fetchall()
 
     # GL TODAY
@@ -34,6 +34,7 @@ def dailyreport():
     job1 = "FieldEntry.Job_ID = 1"
     cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and Date = {d1} GROUP BY SecTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
     rv1 = cur.fetchall()
+
 
     #GL TODAY LAST YEA1R
     val2 = "sum(FieldEntry.GL_Val)"
@@ -80,6 +81,15 @@ def dailyreport():
     a = [i3[0] for i3 in rv4]
     b = [i3[0] for i3 in rv5]
     c = [i3[0] for i3 in rv6] 
+
+    if not x:
+        x = [0,0,0]
+    if not y:
+        y = [0,0,0]
+    if not z:
+        z = [0,0,0]
+    if not c:
+        c = [0,0,0]
     
     q = zip(w,x,y,a,b,z,c)
     json_data = []
@@ -98,7 +108,11 @@ def dailyreport():
     val = "TMEntry.TM_Val "
     tab = "TMEntry"
     cur.execute(f'''select {val} from {tab} where TM_Date = {d1} ''')
-    rv.append(cur.fetchall()[0][0])
+    a = cur.fetchall()
+    if not a:
+        a = [[0]]
+    cur1 = a[0][0]
+    rv.append(cur1)
 
     # [TM TODATE]
     val1 = "sum(TMEntry.TM_Val)"
@@ -157,6 +171,15 @@ def dailyreport():
     rv2 = cur.fetchall()
     xx = [i[0] for i in rv2]
 
+    if not x:
+        x = [0]
+    if not xx:
+        xx = [0]
+    if not y:
+        y = [0]
+    if not yy:
+        yy = [0]
+
     #[Recovery today]
     z = round((x[0] / y[0])*100,2)
     rv.append(z)
@@ -183,6 +206,8 @@ def dailyreport():
     row_headers = ['Job_Name', 'Mandays']
 
     rv = cur.fetchall()
+    if not rv:
+        rv = [[0,0]]
     json_data2 = []
 
     def sids_converter(o):
@@ -209,6 +234,8 @@ def dailyreport():
 
     row_headers = ['Date', 'Prune','Section_Name', 'Mandays', 'Greenleaf', 'AreaCovered', 'GlMnd', 'GlHa', 'MndHa','PluckInt', 'Squad_Name','Jat','SecArea']
     rv = cur.fetchall()
+    if not rv:
+        rv = [['--','--','--','--','--','--','--','--','--','--','--','--','--']]
     json_data3 = []
 
     def sids_converter(o):
@@ -234,6 +261,8 @@ def dailyreport():
     job = "(Jobtab.Job_Group = 2)"
     cur.execute(f'''select {con} , {val} , {fom} from {tab} where {joi} and date ={d1} and {job}''')
     rv = cur.fetchall()
+    if not rv:
+        rv = [[0,0,0,0,0,0,0,0]]
 
     row_headers = ['Date', 'Job_Name','Division','Section_Name', 'Squad_Name', 'Mandays', 'AreaCovered', 'MndArea' ]
     json_data4 = []
@@ -249,6 +278,7 @@ def dailyreport():
 
 ######################
 ## GRADE PER FACTORY
+
 
     cur = mysql.connection.cursor()
 
@@ -269,7 +299,7 @@ def dailyreport():
     rv4 = cur.fetchall()      
 
         #GRADE-NAME
-    cur.execute(f"SELECT TeaGradeTab.TeaGrade_Name FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1}")
+    cur.execute(f"SELECT TeaGradeTab.TeaGrade_Name FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID ")#and date ={d1}
     rv2 = cur.fetchall()
 
     x = [s[0] for s in rv]
@@ -280,11 +310,14 @@ def dailyreport():
 
     z = []
     for number in y:
-        z.append((round((number / x[0]),4)*100))
+        z.append(round(((number / x[0])*100),2))
 
     zz = []
     for number in yy:
-        zz.append((round((number / xx[0]),4)*100))
+        zz.append(round(((number / xx[0])*100),2))
+
+    if not zz:
+        zz = [0,0,0,0,0,0,0]
 
     zzz = zip(w,zz,z)
 
@@ -305,6 +338,8 @@ def dailyreport():
     joi = "FuelEntry.Fuel_ID = FuelTab.Fuel_ID AND FuelEntry.Mach_ID = MachineTab.Mach_ID AND TMEntry.TM_Date = FuelEntry.Date"
     cur.execute(f'''select {con} , {fom}  from {tab} where {joi} and Date = {d1} group by MachineTab.MACH_NAME''')
     rv = cur.fetchall()
+    if not rv:
+        rv = [[0,0,0,0]]
 
     row_headers = ['Machine', 'FuelUsed' , 'TM', 'TMFuel']
     json_data6 = []

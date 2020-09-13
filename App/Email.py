@@ -32,7 +32,7 @@ def email():
 def email_report(d1):
     cur = mysql.connection.cursor()    
     if not d1:
-      d1 = '2020-09-10'
+        d1 = '2020-09-10'
     d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
     #d01 = "'2020-08-24'"
     d01 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(days=1))).split(' ')[0] + "'"
@@ -308,11 +308,11 @@ def email_report(d1):
 
     z = []
     for number in y:
-        z.append((round((number / x[0]),4)*100))
+        z.append(round(((number / x[0])*100),2))
 
     zz = []
     for number in yy:
-        zz.append((round((number / xx[0]),4)*100))
+        zz.append(round(((number / xx[0])*100),2))
 
     zzz = zip(w,zz,z)
 
@@ -354,7 +354,7 @@ def email_report(d1):
     json_final['GradePer'] = json_data5 #3
     json_final['FuelReport'] = json_data6 #4
 
-    return json_final, d1
+    json_final, d1
 
 
 

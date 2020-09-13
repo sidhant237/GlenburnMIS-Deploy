@@ -28,6 +28,8 @@ def cultivationdaily():
     job = "(Jobtab.Job_Group = 2)"
     cur.execute(f'''select {con} , {val} , {fom} from {tab} where {joi} and date >={d1} and date <={d2} and {job}''')
     rv = cur.fetchall()
+    if not rv:
+        rv = [['--','--','--','--','--','--','--','--']]
 
     row_headers = ['Date', 'Job_Name', 'Division', 'Section_Name', 'Squad_Name', 'Mandays', 'AreaCovered', 'Mnd_Area']
     json_data = []
@@ -58,6 +60,8 @@ def cultivationgroup():
     job = "(Jobtab.Job_Group = 2)"
     cur.execute(f'''select {con} , {val} , {val1} , {fom}  from {tab} where {joi} and date >={d1} and date <={d2} and {job} group by FieldEntry.Job_ID''')
     rv = cur.fetchall()
+    if not rv:
+        rv = [['--','--','--','--']]
     row_headers = ['Job_Name', 'Mandays', 'AreaCovered', 'MndArea']
 
     json_data = []
@@ -79,6 +83,8 @@ def pluckingdaily():
     cur = mysql.connection.cursor()
     d1 = "'" + (str(request.args.get("start"))) + "'"
     d2 = "'" + (str(request.args.get("end"))) + "'"
+    #d1 = "'2020-09-06'"
+    #d2= "'2020-09-06'"
      
     con = "FieldEntry.date, PruneTab.Prune_Name, SecTab.Sec_Name"
     val = "FieldEntry.Mnd_Val, FieldEntry.GL_Val, FieldEntry.Area_Val"
@@ -88,14 +94,16 @@ def pluckingdaily():
     joi = "FieldEntry.Squ_ID = SquTab.Squ_ID AND FieldEntry.Job_ID=Jobtab.Job_ID AND FieldEntry.Sec_ID=SecTab.Sec_ID AND DivTab.Div_ID=SecTab.Div_ID AND PruneTab.Prune_Type = SecTab.Prune_Type"
     job = "(FieldEntry.Job_ID = 1 )"
     cur.execute(f'''select {con} , {val} , {fom} ,{con2} from {tab} where {joi} and date >={d1} and date <={d2} and {job} ORDER BY SecTab.Prune_Type DESC, (GL_Val/Area_Val) DESC ''')
-
     row_headers = ['Date', 'Prune','Section_Name', 'Mandays', 'Greenleaf', 'AreaCovered', 'GlMnd', 'GlHa', 'MndHa','PluckInt', 'Squad_Name','Jat','SecArea']
     rv = cur.fetchall()
+    if not rv:
+        rv = [['--','--','--','--','--','--','--','--','--','--','--','--','--']]
     json_data = []
 
     def sids_converter(o):
         if isinstance(o, datetime.date):
                 return str(o.month) + str("/") + str(o.day)
+    print(type(rv))
 
     for result in rv:
         json_data.append(dict(zip(row_headers , result)))
@@ -121,6 +129,8 @@ def pluckinggroup():
         cur.execute(f'''select {con} , {val} , {fom} from {tab} where {joi} and date >={d1} and date <={d2} and {job} group by SecTab.Sec_ID''')
         row_headers = ['Section_Name', 'Mandays', 'Greenleaf', 'AreaCovered', 'GLMnd', 'GLArea', 'MndArea']
         rv = cur.fetchall()
+        if not rv:
+            rv = [['--','--','--','--','--','--','--']]
 
     if grp == "'Division'":
         con = "DivTab.Div_Name"
@@ -132,6 +142,8 @@ def pluckinggroup():
         cur.execute(f'''select {con} , {val} , {fom} from {tab} where {joi} and date >={d1} and date <={d2} and {job} group by SecTab.Div_ID''')
         row_headers = ['Division', 'Mandays', 'Greenleaf', 'AreaCovered', 'GLMnd', 'GLArea', 'MndArea']
         rv = cur.fetchall()
+        if not rv:
+            rv = [['--','--','--','--','--','--','--']]
 
     if grp == "'Squad'":
         con = "SquTab.Squ_Name"
@@ -141,9 +153,10 @@ def pluckinggroup():
         joi = "FieldEntry.Squ_ID = SquTab.Squ_ID AND FieldEntry.Job_ID=Jobtab.Job_ID AND FieldEntry.Sec_ID=SecTab.Sec_ID AND DivTab.Div_ID=SecTab.Div_ID"
         job = "(FieldEntry.Job_ID = 1 )"
         cur.execute(f'''select {con} , {val} , {fom} from {tab} where {joi} and date >={d1} and date <={d2} and {job} group by SquTab.Squ_ID order by SquTab.Squ_Name asc''')
-
         row_headers = ['Squad', 'Mandays', 'Greenleaf', 'AreaCovered', 'GLMnd', 'GLArea', 'MndArea']
         rv = cur.fetchall()
+        if not rv:
+            rv = [['--','--','--','--','--','--','--']]
 
     json_data = []
     def sids_converter(o):
@@ -169,8 +182,9 @@ def mandaydeployment():
     joi = "FieldEntry.Job_ID=Jobtab.Job_ID"
     cur.execute(f'''select {con} , {val} from {tab} where {joi} and date >={d1} and date <={d2} group by FieldEntry.Job_ID ORDER BY sum(FieldEntry.Mnd_Val) DESC''')
     row_headers = ['Job_Name','JobID', 'Mandays']
-
     rv = cur.fetchall()
+    if not rv:
+        rv = [['--','--','--']]
     json_data = []
 
     def sids_converter(o):
@@ -185,17 +199,21 @@ def mandaydeployment():
 #6
 @app.route('/fuelreport',methods=['GET', 'POST'])
 @cross_origin()
+
 def fuelreport():
     cur = mysql.connection.cursor()
     d1 = "'" + (str(request.args.get("start"))) + "'"
     d2 = "'" + (str(request.args.get("end"))) + "'"
+    
 
-    con = " MachineTab.Mach_Name"
-    fom = " sum(FuelEntry.Fuel_Val), sum(TM_Val), ROUND((/sum(FuelEntry.Fuel_Val/sum(TMEntry.TM_Val))),2)"
+    con = " MachineTab.MACH_NAME"
+    fom = " sum(FuelEntry.Fuel_Val), sum(TM_Val), ROUND((SUM(FuelEntry.Fuel_Val)/sum(TM_Val)),2)"
     tab = "FuelEntry, MachineTab, FuelTab, TMEntry"
     joi = "FuelEntry.Fuel_ID = FuelTab.Fuel_ID AND FuelEntry.Mach_ID = MachineTab.Mach_ID AND TMEntry.TM_Date = FuelEntry.Date"
-    cur.execute(f'''select {con} , {fom}  from {tab} where {joi} and date >= {d1} and date <= {d2} group by MachineTab.Mach_Name''')
+    cur.execute(f'''select {con} , {fom}  from {tab} where {joi} and date >= {d1} and date <= {d2} group by MachineTab.MACH_NAME''')
     rv = cur.fetchall()
+    if not rv:
+        rv = [['--','--','--','--']]
 
     row_headers = ['Machine', 'FuelUsed' , 'TM', 'TMFuel']
     json_data = []
@@ -206,8 +224,7 @@ def fuelreport():
 
     for row in rv:
         json_data.append(dict(zip(row_headers,row)))
-    return json.dumps(json_data, default=sids_converter)  
-
+    return json.dumps(json_data, default=sids_converter)
 
 
 

@@ -13,7 +13,7 @@ from dateutil.relativedelta import relativedelta
 def displayfactory():      
       d1 = request.args.get("start") 
       if not d1:
-            d1 = "2020-08-26"
+            d1 = "2020-09-06"
       d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
       d01 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(days=1))).split(' ')[0] + "'"
       #     d11 = "'2020-08-22'"
@@ -31,8 +31,12 @@ def displayfactory():
       val = "TMEntry.TM_Val "
       tab = "TMEntry"
       cur.execute(f'''select {val} from {tab} where TM_Date = {d1} ''')
-      rv.append(cur.fetchall()[0][0])
-
+      a = cur.fetchall()
+      if not a:
+            a = [[0]]
+      cur1 = a[0][0]
+      rv.append(cur1)
+      
       # [TM TODATE]
       val1 = "sum(TMEntry.TM_Val)"
       tab1 = "TMEntry"
@@ -90,12 +94,21 @@ def displayfactory():
       rv2 = cur.fetchall()
       xx = [i[0] for i in rv2]
 
+      if not x:
+            x = [0]
+      if not xx:
+            xx = [0]
+      if not y:
+            y = [0]
+      if not yy:
+            yy = [0]
+
       #[Recovery today]
       z = round((x[0] / y[0])*100,2)
       rv.append(z)
 
       zz = round((xx[0]/yy[0])*100,2)
-      rv.append(zz)   
+      rv.append(zz) 
 
       column_headers =  ['TMToday', 'TMTodate', 'TMTodateLY','Difference', 'RecoveryToday', 'RecoveryTodate']
       
@@ -114,8 +127,9 @@ def displayfactory():
       tab = "DivTab, SecTab, FieldEntry"
       joi = "(FieldEntry.Sec_ID=SecTab.Sec_ID) AND (SecTab.Div_ID = DivTab.Div_ID)"
       job = "FieldEntry.Job_ID = 1"
-      cur.execute(f'''select {val} from {tab} where {joi} AND {job} and date = {d1} GROUP BY SecTab.Div_ID''')
+      cur.execute(f'''select {val} from {tab} where {joi} AND {job}  GROUP BY SecTab.Div_ID''')#and date = {d1}
       rv = cur.fetchall()
+     
 
       # GL TODAY
       val1 = "SUM(FieldEntry.GL_Val)"
@@ -124,6 +138,7 @@ def displayfactory():
       job1 = "FieldEntry.Job_ID = 1"
       cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and Date = {d1} GROUP BY SecTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
       rv1 = cur.fetchall()
+      
 
       #GL TODAY LAST YEA1R
       val2 = "sum(FieldEntry.GL_Val)"
@@ -132,6 +147,7 @@ def displayfactory():
       job2 = "FieldEntry.Job_ID = 1"
       cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and Date = {d11} GROUP BY SecTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
       rv2 = cur.fetchall()
+      
 
       # GL TODATE
       val1 = "SUM(FieldEntry.GL_Val)"
@@ -140,6 +156,7 @@ def displayfactory():
       job1 = "FieldEntry.Job_ID = 1"
       cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and Date >= {d0} and Date <= {d1} GROUP BY SecTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
       rv4 = cur.fetchall()
+      
 
       #GL TODATE LAST YEA1R
       val2 = "sum(FieldEntry.GL_Val)"
@@ -149,12 +166,14 @@ def displayfactory():
       cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and Date >= {d00} and Date <= {d11} GROUP BY DivTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
       rv5 = cur.fetchall()
       
+      
       #FINE LEAF% TODAYS GL
       val3 = "sum(FL_Per)"
       tab3 = "FLEntry, DivTab"
       joi3 = "(FLEntry.Div_ID = DivTab.Div_ID)"
       cur.execute(f'''select {val3} from {tab3} where {joi3} and Date = {d1} GROUP BY DivTab.Div_ID''')
       rv3 = cur.fetchall()
+      
 
       #FINE LEAF% TODAYS GL LY
       val3 = "sum(FL_Per)"
@@ -162,6 +181,7 @@ def displayfactory():
       joi3 = "(FLEntry.Div_ID = DivTab.Div_ID)"
       cur.execute(f'''select {val3} from {tab3} where {joi3} and Date = {d11} GROUP BY DivTab.Div_ID''')
       rv6 = cur.fetchall()
+      
 
       w = [i[0] for i in rv]
       x = [i1[0] for i1 in rv1]
@@ -171,6 +191,17 @@ def displayfactory():
       b = [i3[0] for i3 in rv5]
       c = [i3[0] for i3 in rv6] 
       
+      #if not w:
+      #      w = [0]
+      if not x:
+            x = [0,0,0]
+      if not y:
+            y = [0,0,0]
+      if not z:
+            z = [0,0,0]
+      if not c:
+            c = [0,0,0]
+
       q = zip(w,x,y,a,b,z,c)
       json_data1 = []
       column_headers = ['Division','GLToday','GLTodayLY','GLTodate','GLTodateLY','FineLeaf','FineLeafLY']
@@ -201,7 +232,7 @@ def displayfactory():
       rv4 = cur.fetchall()      
 
             #GRADE-NAME
-      cur.execute(f"SELECT TeaGradeTab.TeaGrade_Name FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1}")
+      cur.execute(f"SELECT TeaGradeTab.TeaGrade_Name FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID ")#and date ={d1}
       rv2 = cur.fetchall()
 
       x = [s[0] for s in rv]
@@ -212,11 +243,14 @@ def displayfactory():
 
       z = []
       for number in y:
-            z.append((round((number / x[0]),4)*100))
+            z.append(round(((number / x[0])*100),2))
 
       zz = []
       for number in yy:
-            zz.append((round((number / xx[0]),4)*100))
+            zz.append(round(((number / xx[0])*100),2))
+
+      if not zz:
+            zz = [0,0,0,0,0,0,0]
 
       zzz = zip(w,zz,z)
 
