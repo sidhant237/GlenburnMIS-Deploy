@@ -4,27 +4,19 @@ import json, datetime, os, csv
 from App import app, mysql
 
 
-@app.route('/upload',methods=['POST'])
+@app.route('/del',methods=['GET','POST','DELETE'])
 @cross_origin()
 def upload_csv_file():
-      cur = mysql.connection.cursor()
 
-      if request.method == "POST":
-            file = request.files['file']
-            if file:
-                  #saving file in the localstorage
-                  file_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), file.filename)
-                  file.save(file_path)
+      if request.method == "GET":
+            cur = mysql.connection.cursor()
 
-            #opening file for writing
-            csv_data = csv.reader(open(file_path))
-            for row in csv_data:
-                  query = f'''INSERT INTO fieldentry (Date, fieldentry.GL_Val, Job_ID, Sec_ID) VALUES ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])})'''
-                  print(query)
-                  cur.execute(query)
-                  mysql.connection.commit()
-
-            return json.dumps({'message': 'success'}), 200
+            query = f'''DELETE from FieldEntry where date = '2020-09-25' '''
+            print(query)
+            cur.execute(query)
+            mysql.connection.commit()
+      print('hi')
+      return json.dumps({'message': 'success'}), 200
 
 
 @app.route('/pluckentry',methods=['POST'])
@@ -65,11 +57,11 @@ def cultentry():
             #opening file for writing
             csv_data = csv.reader(open(file_path))
             for row in csv_data:
-                  query = f'''INSERT INTO FieldEntry (FieldEntry.Date, FieldEntry.GL_Val, FieldEntry.Job_ID, FieldEntry.Sec_ID) VALUES ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])})'''
-                  #query = f'''Insert Into FieldEntry (Date,Job_ID,Sec_ID,Squ_ID,Mnd_Val,Area_Val) Values ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])},{int(row[4])},{float(row[5])})'''
+                  query = f'''Insert Into FieldEntry (Date,Job_ID,Sec_ID,Squ_ID,Mnd_Val,Area_Val) Values ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])},{int(row[4])},{float(row[5])})'''
                   print(query)
                   cur.execute(query)
                   mysql.connection.commit()
+            
 
             return json.dumps({'message': 'success'}), 200
 
@@ -203,36 +195,3 @@ def update_dates():
 
     return json.dumps({'message': 'success'})
 
-
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
-
-
-##FUELENTRY - 
-#query = f'''INSERT INTO fuelentry (Date, Fuel_ID, Mach_ID, Fuel_Val) VALUES ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])})'''
-
-#FIELDENTRY - WITHOUT PLUCK/CULT (DATE/JOB/MND)
-#query = f'''INSERT INTO FIELDENTRY (Date, Job_ID, Mnd_Val) VALUES ('{str(row[0])}',{int(row[1])},{int(row[2])})'''
-################
-#PluckEntry
-#query = f'''Insert Into FieldEntry (Date,Job_ID,Sec_ID,Squ_ID,Mnd_Val,Area_Val,GL_Val,Pluck_Int) Values ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])},{int(row[4])},{int(row[5])},{int(row[6])},{int(row[7])},{int(row[8])})'''
-
-#CultEntry
-#query = f'''Insert Into FieldEntry (Date,Job_ID,Sec_ID,Squ_ID,Mnd_Val,Area_Val) Values ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])},{int(row[4])},{int(row[5])},{int(row[6])})'''
-
-#JobEntry
-#query = f'''Insert Into FieldEntry (Date,Job_ID,Mnd_Val) Values ('{str(row[0])}',{int(row[1])},{int(row[2])})'''
-
-#TMEntry
-#query = f'''Insert Into TMEntry (TM_Date,TM_Val) Values ('{str(row[0])}',{int(row[1])})'''
-
-#FuelEntry
-#query = f'''Insert Into fuelentry (Date, Fuel_ID, Mach_ID, Fuel_Val) Values ('{str(row[0])}',{int(row[1])},{int(row[2])},{int(row[3])})'''
-
-#Sort Entry
-#query = f'''Insert Into SortEntry (Date,TeaGrade_ID,Sort_Kg) Values ('{str(row[0])}',{int(row[1])},{int(row[2])})'''
-
-#FL Entry
-#query = f'''Insert Into FLEntry (Date,Div_ID,FL_Per) Values ('{str(row[0])}',{int(row[1])},{int(row[2])})'''

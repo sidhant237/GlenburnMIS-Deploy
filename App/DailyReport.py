@@ -12,7 +12,7 @@ def dailyreport():
     cur = mysql.connection.cursor()
     d1 = request.args.get("start")
     if not d1:
-      d1 = '2020-09-06'
+      d1 = '2020-09-22'
     d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
     d01 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(days=1))).split(' ')[0] + "'"
     d1 = "'" + d1 + "'"

@@ -233,11 +233,13 @@ def fuelreport():
 @cross_origin()
 def greenleaf():
     cur = mysql.connection.cursor()
-    #d1 = request.args.get("start") 
-    #d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
-    #d1 = "'" + d1 + "'"
-    d1 = "'2020-09-09'"
-    d11 = "'2020-09-09'"
+    d1 = request.args.get("start") 
+    if not d1:
+        d1 = '2020-09-26'
+    d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
+    d1 = "'" + d1 + "'"
+    
+    
     #DIV NAME
     val = "DivTab.Div_Name"
     tab = "DivTab, SecTab, FieldEntry"
@@ -245,6 +247,8 @@ def greenleaf():
     job = "FieldEntry.Job_ID = 1"
     cur.execute(f'''select {val} from {tab} where {joi} AND {job} and date = {d1} GROUP BY DivTab.Div_ID''')
     rv = cur.fetchall()
+    if not rv:
+        rv = [['Glen'],['Kim'],['Sim']]
 
     # GL TODAY
     val1 = "SUM(FieldEntry.GL_Val)"
@@ -253,6 +257,8 @@ def greenleaf():
     job1 = "FieldEntry.Job_ID = 1"
     cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and date = {d1} GROUP BY DivTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
     rv1 = cur.fetchall()
+    if not rv1:
+        rv1 = [[0],[0],[0]]
 
     #GL TODAY LAST YEA1R
     val2 = "SUM(FieldEntry.GL_Val)"
@@ -261,6 +267,8 @@ def greenleaf():
     job2 = "FieldEntry.Job_ID = 1"
     cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and date = {d11} GROUP BY DivTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
     rv2 = cur.fetchall()
+    if not rv2:
+        rv2 = [[0],[0],[0]]
 
     #FINE LEAF% TODAYS GL
     val3 = "sum(FL_Per)"
@@ -268,6 +276,8 @@ def greenleaf():
     joi3 = "(FLEntry.Div_ID = DivTab.Div_ID)"
     cur.execute(f'''select {val3} from {tab3} where {joi3} and date = {d1} GROUP BY DivTab.Div_ID''')
     rv3 = cur.fetchall()
+    if not rv3:
+        rv3 = [[0],[0],[0]]
 
     w = [i[0] for i in rv]
     x = [i1[0] for i1 in rv1]

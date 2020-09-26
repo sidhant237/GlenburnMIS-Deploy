@@ -32,7 +32,7 @@ def email():
 def email_report(d1):
     cur = mysql.connection.cursor()    
     if not d1:
-        d1 = '2020-09-10'
+        d1 = '2020-09-25'
     d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
     #d01 = "'2020-08-24'"
     d01 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(days=1))).split(' ')[0] + "'"
@@ -102,7 +102,14 @@ def email_report(d1):
     b = [int(i3[0]) for i3 in rv5]
     c = [int(i3[0]) for i3 in rv6] 
     
-    
+    if not x:
+        x = [0,0,0]
+    if not y:
+        y = [0,0,0]
+    if not z:
+        z = [0,0,0]
+    if not c:
+        c = [0,0,0]
     
     q = zip(w,x,y,a,b,z,c)
     json_data = []
@@ -120,19 +127,23 @@ def email_report(d1):
     val = "TMEntry.TM_Val "
     tab = "TMEntry"
     cur.execute(f'''select {val} from {tab} where TM_Date = {d1} ''')
-    rv.append(int(cur.fetchall()[0][0]))
+    a = cur.fetchall()
+    if not a:
+        a = [[0]]
+    cur1 = a[0][0]
+    rv.append(cur1)
 
     # [TM TODATE]
     val1 = "sum(TMEntry.TM_Val)"
     tab1 = "TMEntry"
     cur.execute(f'''select {val1} from {tab1} where TM_Date >= {d0} AND TM_Date <= {d1} ''')
-    rv.append(int(cur.fetchall()[0][0]))
+    rv.append(cur.fetchall()[0][0])
 
     # [TM TODATE LAST YEAR]
     val2 = "sum(TMEntry.TM_Val)"
     tab2 = "TMEntry"
     cur.execute(f'''select {val2} from {tab2} where TM_Date >= {d00} AND TM_Date <= {d11} ''')
-    rv.append(int(cur.fetchall()[0][0]))
+    rv.append(cur.fetchall()[0][0])
 
     # [TM TODATE] -- For difference
     val1 = "sum(TMEntry.TM_Val)"
@@ -148,7 +159,7 @@ def email_report(d1):
 
     a = [i[0] for i in rv8]
     b = [i[0] for i in rv9]
-    c = int(a[0] - b[0])
+    c = a[0] - b[0]
     rv.append(c)
 
     #[GL YEST]
@@ -156,28 +167,37 @@ def email_report(d1):
     tab3 = "FieldEntry"
     cur.execute(f'''select {val3} from {tab3} where Date = {d01}''')
     rv3 = cur.fetchall()
-    y = [int(i[0]) for i in rv3]
+    y = [i[0] for i in rv3]
 
     #[TM TODAY]
     val = "TMEntry.TM_Val "
     tab = "TMEntry"
     cur.execute(f'''select {val} from {tab} where TM_Date = {d1} ''')
     rv1 = cur.fetchall()
-    x = [int(i[0]) for i in rv1]
+    x = [i[0] for i in rv1]
 
     #[GL TODATE]
     val3 = "sum(FieldEntry.GL_Val)"
     tab3 = "FieldEntry"
     cur.execute(f'''select {val3} from {tab3} where Date >= {d0} and Date <= {d01}''')
     rv4 = cur.fetchall()
-    yy = [int(i[0]) for i in rv4]
+    yy = [i[0] for i in rv4]
     
     #[TM TODATE]
     val1 = "sum(TMEntry.TM_Val)"
     tab1 = "TMEntry"
     cur.execute(f'''select {val1} from {tab1} where TM_Date >= {d0} AND TM_Date <= {d1} ''')
     rv2 = cur.fetchall()
-    xx = [int(i[0]) for i in rv2]
+    xx = [i[0] for i in rv2]
+
+    if not x:
+        x = [0]
+    if not xx:
+        xx = [0]
+    if not y:
+        y = [0]
+    if not yy:
+        yy = [0]
 
     #[Recovery today]
     z = round((x[0] / y[0])*100,2)
@@ -187,7 +207,7 @@ def email_report(d1):
     rv.append(zz)   
 
     column_headers =  ['TMToday', 'TMTodate', 'TMTodateLY','Difference', 'RecoveryToday', 'RecoveryTodate']
-    
+
     json_data1 = []
     json_data1.append(dict(zip(column_headers, rv)))
     
@@ -205,6 +225,8 @@ def email_report(d1):
     row_headers = ['Job_Name', 'Mandays']
 
     rv = cur.fetchall()
+    if not rv:
+        rv = [[0,0]]
     json_data2 = []
 
     def sids_converter(o):
@@ -354,7 +376,7 @@ def email_report(d1):
     json_final['GradePer'] = json_data5 #3
     json_final['FuelReport'] = json_data6 #4
 
-    json_final, d1
+    return json_final, d1
 
 
 

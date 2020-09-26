@@ -12,10 +12,7 @@ MYSQL_HOST = "aa3uwdk1bwspg2.cmagocj6ky2v.ap-south-1.rds.amazonaws.com"
 MYSQL_USER = "root"
 MYSQL_PASSWORD = 'glenburnmis'
 MYSQL_DB = "ebdb"
-#MYSQL_HOST = "localhost"
-#MYSQL_User = "root"
-#MYSQL_Password = "Supernova723!"
-#MYSQL_DB = "WokDB"
+
 
 
 #mail sending configuration
