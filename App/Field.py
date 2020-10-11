@@ -173,9 +173,11 @@ def pluckinggroup():
 @cross_origin()
 def mandaydeployment():
     cur = mysql.connection.cursor()
-    d1 = "'" + (str(request.args.get("start"))) + "'"
-    d2 = "'" + (str(request.args.get("end"))) + "'"
-    
+    #d1 = "'" + (str(request.args.get("start"))) + "'"
+    #d2 = "'" + (str(request.args.get("end"))) + "'"
+    d1 = "'2020-09-25'"
+    d2 = "'2020-09-25'"
+
     con = "Jobtab.Job_Name,Jobtab.Job_ID"
     val = "SUM(FieldEntry.Mnd_Val)"
     tab = "FieldEntry,Jobtab"
@@ -185,12 +187,12 @@ def mandaydeployment():
     rv = cur.fetchall()
     if not rv:
         rv = [['--','--','--']]
-    json_data = []
-
+    
+        
     def sids_converter(o):
         if isinstance(o, datetime.date):
                 return str(o.year) + str("/") + str(o.month) + str("/") + str(o.day)
-
+    json_data = []
     for result in rv:
         json_data.append(dict(zip(row_headers, result)))
     return json.dumps(json_data, default=sids_converter)

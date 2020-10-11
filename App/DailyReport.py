@@ -19,21 +19,38 @@ def dailyreport():
     d0 = "'2020-03-01'"  # start date current year
     d00 = "'2019-03-01'"  # start date last year
     
-    #DIV NAME
-    val = "DivTab.Div_name"
-    tab = "DivTab, SecTab, FieldEntry"
-    joi = "(FieldEntry.Sec_ID=SecTab.Sec_ID) AND (SecTab.Div_ID = DivTab.Div_ID)"
-    job = "FieldEntry.Job_ID = 1"
-    cur.execute(f'''select {val} from {tab} where {joi} AND {job}  GROUP BY SecTab.Div_ID''') #and date = {d1}
-    rv = cur.fetchall()
+
+    #DIVISIONWISE GREENLEAF
+    grow = []
+    krow = []
+    srow = []
+
+
+    #DIV NAME - SINGLE STATEMENT
+    cur.execute(f'''SELECT DivTab.Div_name FROM DivTab WHERE DivTab.Div_ID = 1''')
+    grow.append(cur.fetchall()[0][0])
+
+    cur.execute(f'''SELECT DivTab.Div_name FROM DivTab WHERE DivTab.Div_ID = 2''')
+    krow.append(cur.fetchall()[0][0])
+
+    cur.execute(f'''SELECT DivTab.Div_name FROM DivTab WHERE DivTab.Div_ID = 3''')
+    srow.append(cur.fetchall()[0][0])
 
     # GL TODAY
     val1 = "SUM(FieldEntry.GL_Val)"
     tab1 = "DivTab, SecTab, FieldEntry"
     joi1 = "(FieldEntry.Sec_ID=SecTab.Sec_ID) AND (SecTab.Div_ID = DivTab.Div_ID)"
     job1 = "FieldEntry.Job_ID = 1"
-    cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and Date = {d1} GROUP BY SecTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
-    rv1 = cur.fetchall()
+    
+    cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and Date = {d1} and SecTab.Div_ID = 1''')
+    grow.append(cur.fetchall()[0][0])
+    
+    cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and Date = {d1} and SecTab.Div_ID = 2''')
+    krow.append(cur.fetchall()[0][0])
+    
+    cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and Date = {d1} and SecTab.Div_ID = 3''')
+    srow.append(cur.fetchall()[0][0])
+    
 
 
     #GL TODAY LAST YEA1R
@@ -41,64 +58,102 @@ def dailyreport():
     tab2 = "FieldEntry, DivTab, SecTab"
     joi2 = "(FieldEntry.Sec_ID=SecTab.Sec_ID) AND (SecTab.Div_ID = DivTab.Div_ID)"
     job2 = "FieldEntry.Job_ID = 1"
-    cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and Date = {d11} GROUP BY SecTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
-    rv2 = cur.fetchall()
+    
+    cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and Date = {d11} and SecTab.Div_ID = 1''')
+    grow.append(cur.fetchall()[0][0])
+
+    cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and Date = {d11} and SecTab.Div_ID = 2''')
+    krow.append(cur.fetchall()[0][0])
+
+    cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and Date = {d11} and SecTab.Div_ID = 3''')
+    srow.append(cur.fetchall()[0][0])
+
 
     # GL TODATE
     val1 = "SUM(FieldEntry.GL_Val)"
     tab1 = "DivTab, SecTab, FieldEntry"
     joi1 = "(FieldEntry.Sec_ID=SecTab.Sec_ID) AND (SecTab.Div_ID = DivTab.Div_ID)"
     job1 = "FieldEntry.Job_ID = 1"
-    cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and Date >= {d0} and Date <= {d1} GROUP BY SecTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
-    rv4 = cur.fetchall()
+    
+    cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and Date >= {d0} and Date <= {d1} and SecTab.Div_ID = 1''')
+    grow.append(cur.fetchall()[0][0])
+
+    cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and Date >= {d0} and Date <= {d1} and SecTab.Div_ID = 2''')
+    krow.append(cur.fetchall()[0][0])
+
+    cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and Date >= {d0} and Date <= {d1} and SecTab.Div_ID = 3''')
+    srow.append(cur.fetchall()[0][0])
+
 
     #GL TODATE LAST YEA1R
     val2 = "sum(FieldEntry.GL_Val)"
     tab2 = "FieldEntry, DivTab, SecTab"
     joi2 = "(FieldEntry.Sec_ID=SecTab.Sec_ID) AND (SecTab.Div_ID = DivTab.Div_ID)"
     job2 = "FieldEntry.Job_ID = 1"
-    cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and Date >= {d00} and Date <= {d11} GROUP BY DivTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
-    rv5 = cur.fetchall()
     
+    cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and Date >= {d00} and Date <= {d11} and SecTab.Div_ID = 1''')
+    grow.append(cur.fetchall()[0][0])
+
+    cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and Date >= {d00} and Date <= {d11} and SecTab.Div_ID = 2''')
+    krow.append(cur.fetchall()[0][0])
+
+    cur.execute(f'''select {val2} from {tab2} where {joi2} AND {job2} and Date >= {d00} and Date <= {d11} and SecTab.Div_ID = 3''')
+    srow.append(cur.fetchall()[0][0])
+    
+
+
     #FINE LEAF% TODAYS GL
-    val3 = "sum(FL_Per)"
-    tab3 = "FLEntry, DivTab"
-    joi3 = "(FLEntry.Div_ID = DivTab.Div_ID)"
-    cur.execute(f'''select {val3} from {tab3} where {joi3} and Date = {d1} GROUP BY DivTab.Div_ID''')
-    rv3 = cur.fetchall()
+    cur.execute(f'''select sum(FL_Per) from FLEntry, DivTab where (FLEntry.Div_ID = DivTab.Div_ID) and Date = {d1} and DivTab.Div_ID = 1''')
+    grow.append(cur.fetchall()[0][0])
 
-    #FINE LEAF% TODAYS GL LY
-    val3 = "sum(FL_Per)"
-    tab3 = "FLEntry, DivTab"
-    joi3 = "(FLEntry.Div_ID = DivTab.Div_ID)"
-    cur.execute(f'''select {val3} from {tab3} where {joi3} and Date = {d11} GROUP BY DivTab.Div_ID''')
-    rv6 = cur.fetchall()
+    cur.execute(f'''select sum(FL_Per) from FLEntry, DivTab where (FLEntry.Div_ID = DivTab.Div_ID) and Date = {d1} and DivTab.Div_ID = 2''')
+    krow.append(cur.fetchall()[0][0])
 
-    w = [i[0] for i in rv]
-    x = [i1[0] for i1 in rv1]
-    y = [i2[0] for i2 in rv2]
-    z = [i3[0] for i3 in rv3]
-    a = [i3[0] for i3 in rv4]
-    b = [i3[0] for i3 in rv5]
-    c = [i3[0] for i3 in rv6] 
+    cur.execute(f'''select sum(FL_Per) from FLEntry, DivTab where (FLEntry.Div_ID = DivTab.Div_ID) and Date = {d1} and DivTab.Div_ID = 3''')
+    srow.append(cur.fetchall()[0][0])
 
-    if not x:
-        x = [0,0,0]
-    if not y:
-        y = [0,0,0]
-    if not z:
-        z = [0,0,0]
-    if not c:
-        c = [0,0,0]
+
+    #FINE LEAF% GL LY
+    cur.execute(f'''select sum(FL_Per) from FLEntry, DivTab where (FLEntry.Div_ID = DivTab.Div_ID) and Date = {d11} and DivTab.Div_ID = 1''')
+    grow.append(cur.fetchall()[0][0])
+
+    cur.execute(f'''select sum(FL_Per) from FLEntry, DivTab where (FLEntry.Div_ID = DivTab.Div_ID) and Date = {d11} and DivTab.Div_ID = 2''')
+    krow.append(cur.fetchall()[0][0])
+
+    cur.execute(f'''select sum(FL_Per) from FLEntry, DivTab where (FLEntry.Div_ID = DivTab.Div_ID) and Date = {d11} and DivTab.Div_ID = 3''')
+    srow.append(cur.fetchall()[0][0])
+
+    groww = []
+    for x in grow:
+        if not x:
+            x = '/'
+        groww.append(x)
     
-    q = zip(w,x,y,a,b,z,c)
+    kroww = []
+    for x in krow:
+        if not x:
+            x = '/'
+        kroww.append(x)
+
+    sroww = []
+    for x in srow:
+        if not x:
+            x = '/'
+        sroww.append(x)
+
+    
+    czip = []
+    czip.append(groww)  
+    czip.append(kroww)
+    czip.append(sroww)
+
     json_data = []
     column_headers = ['Division','GLToday','GLTodayLY','GLTodate','GLTodateLY','FineLeaf','FineLeafLY']
-
-    for row in q:
+    for row in czip:
         json_data.append(dict(zip(column_headers, row)))
-    
+        
 
+    
 
     #8 TEAMADE##############
     cur = mysql.connection.cursor()
@@ -354,10 +409,10 @@ def dailyreport():
 
     json_final = {}
     json_final['Greenleaf'] = json_data
-    json_final['TeaMade'] = json_data1
-    json_final['Mandays'] = json_data2
-    json_final['Plucking'] = json_data3
-    json_final['Cultivation'] = json_data4
-    json_final['GradePer'] = json_data5
-    json_final['FuelReport'] = json_data6
+    #json_final['TeaMade'] = json_data1
+    #json_final['Mandays'] = json_data2
+    #json_final['Plucking'] = json_data3
+    #json_final['Cultivation'] = json_data4
+    #json_final['GradePer'] = json_data5
+    #json_final['FuelReport'] = json_data6
     return json.dumps(json_final,default=sids_converter)
