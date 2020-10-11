@@ -13,7 +13,7 @@ from dateutil.relativedelta import relativedelta
 def displayfactory():      
       d1 = request.args.get("start") 
       if not d1:
-            d1 = "2020-09-02"
+            d1 = "2020-10-05"
       d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
       d01 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(days=1))).split(' ')[0] + "'"
       #     d11 = "'2020-08-22'"
@@ -136,7 +136,7 @@ def displayfactory():
       tab1 = "DivTab, SecTab, FieldEntry"
       joi1 = "(FieldEntry.Sec_ID=SecTab.Sec_ID) AND (SecTab.Div_ID = DivTab.Div_ID)"
       job1 = "FieldEntry.Job_ID = 1"
-      cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and Date = {d1} GROUP BY SecTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
+      cur.execute(f'''select {val1} from {tab1} where {joi1} AND {job1} and date = {d1} GROUP BY SecTab.Div_ID ORDER BY DivTab.Div_ID ASC''')
       rv1 = cur.fetchall()
       
 
@@ -175,7 +175,7 @@ def displayfactory():
       rv3 = cur.fetchall()
       
 
-      #FINE LEAF% TODAYS GL LY
+      #FINE LEAF% GL LY
       val3 = "sum(FL_Per)"
       tab3 = "FLEntry, DivTab"
       joi3 = "(FLEntry.Div_ID = DivTab.Div_ID)"
@@ -193,22 +193,24 @@ def displayfactory():
       
       #if not w:
       #      w = [0]
-      if not x:
-            x = [0,0,0]
-      if not y:
-            y = [0,0,0]
-      if not z:
-            z = [0,0,0]
-      if not c:
-            c = [0,0,0]
+      #if not x:
+      #      x = [0,0,0]
+      #if not y:
+      #      y = [0,0,0]
+      #if not z:
+      #      z = [0,0,0]
+      #if not c:
+      #      c = [0,0,0]
 
       q = zip(w,x,y,a,b,z,c)
       json_data1 = []
-      column_headers = ['Division','GLToday','GLTodayLY','GLTodate','GLTodateLY','FineLeaf','FineLeafLY']
+      #column_headers = ['Division','GLToday','GLTodayLY','GLTodate','GLTodateLY','FineLeaf','FineLeafLY']
 
-      for row in q:
-            json_data1.append(dict(zip(column_headers, row)))
-      
+      #for row in q:
+      #      json_data1.append(dict(zip(column_headers, row)))
+
+      column_headers = ['1','2','3']
+      json_data1.append(dict(zip(column_headers,rv6)))
 
 
 #10## GRADE PER FACTORY
@@ -262,7 +264,7 @@ def displayfactory():
       
 
       json_comp = {} 
-      json_comp['TeaMade'] = json_data
+      #json_comp['TeaMade'] = json_data
       json_comp['Greenleaf'] = json_data1
-      json_comp['GradePer'] =json_data5
+      #json_comp['GradePer'] =json_data5
       return json.dumps(json_comp)
