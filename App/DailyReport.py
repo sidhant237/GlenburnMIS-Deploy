@@ -12,7 +12,7 @@ def dailyreport():
     cur = mysql.connection.cursor()
     d1 = request.args.get("start")
     if not d1:
-      d1 = '2020-10-05'
+      d1 = '2020-10-10'
     d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
     d01 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(days=1))).split(' ')[0] + "'"
     d1 = "'" + d1 + "'"
@@ -166,79 +166,87 @@ def dailyreport():
     a = cur.fetchall()
     if not a:
         a = [[0]]
-    cur1 = a[0][0]
-    rv.append(cur1)
+    rv.append(a[0][0])
 
-    # [TM TODATE]
+    # [TM TODATE] - APPENDED
     val1 = "sum(TMEntry.TM_Val)"
     tab1 = "TMEntry"
     cur.execute(f'''select {val1} from {tab1} where TM_Date >= {d0} AND TM_Date <= {d1} ''')
     rv.append(cur.fetchall()[0][0])
 
-    # [TM TODATE LAST YEAR]
+    # [TM TODATE LAST YEAR] - APPENDED
     val2 = "sum(TMEntry.TM_Val)"
     tab2 = "TMEntry"
     cur.execute(f'''select {val2} from {tab2} where TM_Date >= {d00} AND TM_Date <= {d11} ''')
     rv.append(cur.fetchall()[0][0])
 
-    # [TM TODATE] -- For difference
+    # [TM TODATE] -- FOR +/-
     val1 = "sum(TMEntry.TM_Val)"
     tab1 = "TMEntry"
     cur.execute(f'''select {val1} from {tab1} where TM_Date >= {d0} AND TM_Date <= {d1} ''')
-    rv8 = cur.fetchall()
+    tmtd = cur.fetchall()
 
-    # [TM TODATE LAST YEAR] -- For difference
+    # [TM TODATE LAST YEAR] -- FOR +/-
     val2 = "sum(TMEntry.TM_Val)"
     tab2 = "TMEntry"
     cur.execute(f'''select {val2} from {tab2} where TM_Date >= {d00} AND TM_Date <= {d11} ''')
-    rv9 = cur.fetchall()
+    tmtdly = cur.fetchall()
 
-    a = [i[0] for i in rv8]
-    b = [i[0] for i in rv9]
+    # +/- APPENDED
+    a = [i[0] for i in tmtd]
+    b = [i[0] for i in tmtdly]
     c = a[0] - b[0]
     rv.append(c)
 
-    #[GL YEST]
+    #[GL YEST] - FOR RECOVERY%
     val3 = "sum(FieldEntry.GL_Val)"
     tab3 = "FieldEntry"
     cur.execute(f'''select {val3} from {tab3} where Date = {d01}''')
     rv3 = cur.fetchall()
-    y = [i[0] for i in rv3]
-
-    #[TM TODAY]
+    if not rv3:
+        glyest = ['/']
+    elif rv3[0][0] == 0:
+        glyest = ['/']
+    else:
+        glyest = rv3[0]
+    
+    
+    #[TM TODAY] - FOR RECOVERY%
     val = "TMEntry.TM_Val "
     tab = "TMEntry"
     cur.execute(f'''select {val} from {tab} where TM_Date = {d1} ''')
     rv1 = cur.fetchall()
-    x = [i[0] for i in rv1]
+    if not rv1:
+        tmtoday = ['/']
+    elif rv1[0][0] == 0:
+        tmtoday = ['/']
+    else:
+        tmtoday = rv1[0]
+    
 
-    #[GL TODATE]
+    #[GL TODATE] - FOR RECOVERY%
     val3 = "sum(FieldEntry.GL_Val)"
     tab3 = "FieldEntry"
     cur.execute(f'''select {val3} from {tab3} where Date >= {d0} and Date <= {d01}''')
     rv4 = cur.fetchall()
     yy = [i[0] for i in rv4]
     
-    #[TM TODATE]
+    #[TM TODATE] - FOR RECOVERY%
     val1 = "sum(TMEntry.TM_Val)"
     tab1 = "TMEntry"
     cur.execute(f'''select {val1} from {tab1} where TM_Date >= {d0} AND TM_Date <= {d1} ''')
     rv2 = cur.fetchall()
     xx = [i[0] for i in rv2]
 
-    if not x:
-        x = [0]
-    if not xx:
-        xx = [0]
-    if not y:
-        y = [0]
-    if not yy:
-        yy = [0]
 
-    #[Recovery today]
-    z = round((x[0] / y[0])*100,2)
-    rv.append(z)
+    #[Recovery today] - APPENDED
+    if glyest[0] == '/' or tmtoday[0] == '/':
+        rv.append('/')
+    else:
+        rectoday = round((tmtoday[0] / glyest[0])*100,2)
+        rv.append(rectoday)
 
+    #RECOVERY% TODAY - APPENDED
     zz = round((xx[0]/yy[0])*100,2)
     rv.append(zz)   
 
@@ -246,6 +254,7 @@ def dailyreport():
     
     json_data1 = []
     json_data1.append(dict(zip(column_headers, rv)))
+
     
 ##########MANDAYS########
 
@@ -262,12 +271,9 @@ def dailyreport():
 
     rv = cur.fetchall()
     if not rv:
-        rv = [[0,0]]
-    json_data2 = []
+        rv = [['/','/']]
 
-    def sids_converter(o):
-        if isinstance(o, datetime.date):
-                return str(o.year) + str("/") + str(o.month) + str("/") + str(o.day)
+    json_data2 = []
 
     for result in rv:
         json_data2.append(dict(zip(row_headers, result)))
@@ -290,7 +296,7 @@ def dailyreport():
     row_headers = ['Date', 'Prune','Section_Name', 'Mandays', 'Greenleaf', 'AreaCovered', 'GlMnd', 'GlHa', 'MndHa','PluckInt', 'Squad_Name','Jat','SecArea']
     rv = cur.fetchall()
     if not rv:
-        rv = [['--','--','--','--','--','--','--','--','--','--','--','--','--']]
+        rv = [['/','/','/','/','/','/','/','/','/','/','/','/','/']]
     json_data3 = []
 
     def sids_converter(o):
@@ -317,7 +323,7 @@ def dailyreport():
     cur.execute(f'''select {con} , {val} , {fom} from {tab} where {joi} and date ={d1} and {job}''')
     rv = cur.fetchall()
     if not rv:
-        rv = [[0,0,0,0,0,0,0,0]]
+        rv = [['/','/','/','/','/','/','/','/']]
 
     row_headers = ['Date', 'Job_Name','Division','Section_Name', 'Squad_Name', 'Mandays', 'AreaCovered', 'MndArea' ]
     json_data4 = []
@@ -341,26 +347,57 @@ def dailyreport():
     cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry WHERE date >= {d0} and date <={d1} ")
     rv = cur.fetchall()
 
-        #SUM-ALLGRADES-DATE
+    #SUM-ALLGRADES-TODAY
     cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry WHERE date ={d1} ")
     rv3 = cur.fetchall()
 
-        #SUM-PERGRADE-DATERANGE
-    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date >= {d0} and date <={d1} group by TeaGradeTab.TeaGrade_ID")
+    #SUM-PERGRADE-DATERANGE
+    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date >= {d0} and date <={d1} group by TeaGradeTab.TeaGrade_ID order by TeaGradeTab.TeaGrade_ID ASC")
     rv1 = cur.fetchall()
 
-        #PERGRADE-DATE
-    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} group by TeaGradeTab.TeaGrade_ID ")
-    rv4 = cur.fetchall()      
+    #PERGRADE-TODAY
+    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} group by TeaGradeTab.TeaGrade_ID order by TeaGradeTab.TeaGrade_ID ASC")
+    rv4 = cur.fetchall()
+    yy = []
+    for n in rv4:
+        if not n:
+            n = [0]
+        yy.append(n[0])
 
-        #GRADE-NAME
-    cur.execute(f"SELECT TeaGradeTab.TeaGrade_Name FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID ")#and date ={d1}
+
+    #GRADEWISE KG TODAY
+    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} and TeaGradeTab.TeaGrade_ID = 1 ")
+    g1 = cur.fetchall()[0]
+    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} and TeaGradeTab.TeaGrade_ID = 2 ")
+    g2 = cur.fetchall()[0]
+    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} and TeaGradeTab.TeaGrade_ID = 3 ")
+    g3 = cur.fetchall()[0]
+    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} and TeaGradeTab.TeaGrade_ID = 4 ")
+    g4 = cur.fetchall()[0]
+    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} and TeaGradeTab.TeaGrade_ID = 5 ")
+    g5 = cur.fetchall()[0]
+    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} and TeaGradeTab.TeaGrade_ID = 6 ")
+    g6 = cur.fetchall()[0]
+    cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date ={d1} and TeaGradeTab.TeaGrade_ID = 7 ")
+    g7 = cur.fetchall()[0]
+    
+    glist = g1 + g2 + g3 + g4 + g5 + g6 + g7
+    gtoday = []
+    for n in glist:
+        if not n:
+            n = 0
+        gtoday.append(n)    
+
+
+    #GRADE-NAME
+    cur.execute(f"SELECT TeaGradeTab.TeaGrade_Name FROM TeaGradeTab order by TeaGradeTab.TeaGrade_ID ASC")#and date ={d1}
     rv2 = cur.fetchall()
 
+    
+    
     x = [s[0] for s in rv]
     xx = [s[0] for s in rv3]
     y = [i[0] for i in rv1]
-    yy = [h[0] for h in rv4]
     w = [str(u[0]) for u in rv2]
 
     z = []
@@ -368,11 +405,11 @@ def dailyreport():
         z.append(round(((number / x[0])*100),2))
 
     zz = []
-    for number in yy:
+    for number in gtoday:
         zz.append(round(((number / xx[0])*100),2))
 
     if not zz:
-        zz = [0,0,0,0,0,0,0]
+        zz = [0,0,0,0,0,0,0,0]
 
     zzz = zip(w,zz,z)
 
@@ -381,6 +418,8 @@ def dailyreport():
 
     for row in zzz:
         json_data5.append(dict(zip(column_headers,row)))
+
+
     
 
     ############
@@ -394,7 +433,7 @@ def dailyreport():
     cur.execute(f'''select {con} , {fom}  from {tab} where {joi} and Date = {d1} group by MachineTab.MACH_NAME''')
     rv = cur.fetchall()
     if not rv:
-        rv = [[0,0,0,0]]
+        rv = [['/','/','/','/']]
 
     row_headers = ['Machine', 'FuelUsed' , 'TM', 'TMFuel']
     json_data6 = []
@@ -408,11 +447,11 @@ def dailyreport():
 
 
     json_final = {}
-    json_final['Greenleaf'] = json_data
+    #json_final['Greenleaf'] = json_data
     #json_final['TeaMade'] = json_data1
     #json_final['Mandays'] = json_data2
     #json_final['Plucking'] = json_data3
     #json_final['Cultivation'] = json_data4
     #json_final['GradePer'] = json_data5
-    #json_final['FuelReport'] = json_data6
+    json_final['FuelReport'] = json_data6
     return json.dumps(json_final,default=sids_converter)
