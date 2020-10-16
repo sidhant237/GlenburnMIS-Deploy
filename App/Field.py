@@ -173,11 +173,9 @@ def pluckinggroup():
 @cross_origin()
 def mandaydeployment():
     cur = mysql.connection.cursor()
-    #d1 = "'" + (str(request.args.get("start"))) + "'"
-    #d2 = "'" + (str(request.args.get("end"))) + "'"
-    d1 = "'2020-09-25'"
-    d2 = "'2020-09-25'"
-
+    d1 = "'" + (str(request.args.get("start"))) + "'"
+    d2 = "'" + (str(request.args.get("end"))) + "'"
+    
     con = "Jobtab.Job_Name,Jobtab.Job_ID"
     val = "SUM(FieldEntry.Mnd_Val)"
     tab = "FieldEntry,Jobtab"
@@ -207,27 +205,21 @@ def fuelreport():
     d1 = "'" + (str(request.args.get("start"))) + "'"
     d2 = "'" + (str(request.args.get("end"))) + "'"
     
-
     con = " MachineTab.MACH_NAME"
-    fom = " sum(FuelEntry.Fuel_Val), sum(TM_Val), ROUND((SUM(FuelEntry.Fuel_Val)/sum(TM_Val)),2)"
+    fom = " sum(FuelEntry.Fuel_Val), TMEntry.TM_Val, ROUND((SUM(FuelEntry.Fuel_Val)/TMEntry.TM_Val),2)"
     tab = "FuelEntry, MachineTab, FuelTab, TMEntry"
     joi = "FuelEntry.Fuel_ID = FuelTab.Fuel_ID AND FuelEntry.Mach_ID = MachineTab.Mach_ID AND TMEntry.TM_Date = FuelEntry.Date"
-    cur.execute(f'''select {con} , {fom}  from {tab} where {joi} and date >= {d1} and date <= {d2} group by MachineTab.MACH_NAME''')
+    cur.execute(f'''select {con} , {fom}  from {tab} where {joi} and Date = {d1} group by MachineTab.MACH_NAME''')
     rv = cur.fetchall()
     if not rv:
-        rv = [['--','--','--','--']]
+        rv = [['/','/','/','/']]
 
     row_headers = ['Machine', 'FuelUsed' , 'TM', 'TMFuel']
     json_data = []
-
-    def sids_converter(o):
-        if isinstance(o, datetime.date):
-                return str(o.year) + str("/") + str(o.month) + str("/") + str(o.day)
-
+    
     for row in rv:
         json_data.append(dict(zip(row_headers,row)))
-    return json.dumps(json_data, default=sids_converter)
-
+    return json.dumps(json_data)
 
 
 #9##

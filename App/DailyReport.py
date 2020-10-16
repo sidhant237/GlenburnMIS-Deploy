@@ -5,27 +5,25 @@ import json, datetime
 from dateutil.relativedelta import relativedelta
 
 
-#9## DAILYRPEORT ###
+## DAILYRPEORT ###
 @app.route('/dailyreport',methods=['GET', 'POST'])
 @cross_origin()
 def dailyreport():
     cur = mysql.connection.cursor()
     d1 = request.args.get("start")
     if not d1:
-      d1 = '2020-10-10'
+      d1 = '2020-10-23'
     d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
     d01 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(days=1))).split(' ')[0] + "'"
     d1 = "'" + d1 + "'"
     d0 = "'2020-03-01'"  # start date current year
     d00 = "'2019-03-01'"  # start date last year
     
-
     #DIVISIONWISE GREENLEAF
     grow = []
     krow = []
     srow = []
-
-
+    
     #DIV NAME - SINGLE STATEMENT
     cur.execute(f'''SELECT DivTab.Div_name FROM DivTab WHERE DivTab.Div_ID = 1''')
     grow.append(cur.fetchall()[0][0])
@@ -350,6 +348,9 @@ def dailyreport():
     #SUM-ALLGRADES-TODAY
     cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry WHERE date ={d1} ")
     rv3 = cur.fetchall()
+    xx = [s[0] for s in rv3]
+    
+    
 
     #SUM-PERGRADE-DATERANGE
     cur.execute(f"SELECT SUM(SortEntry.Sort_Kg) FROM SortEntry, TeaGradeTab WHERE SortEntry.TeaGrade_ID = TeaGradeTab.TeaGrade_ID and date >= {d0} and date <={d1} group by TeaGradeTab.TeaGrade_ID order by TeaGradeTab.TeaGrade_ID ASC")
@@ -394,9 +395,7 @@ def dailyreport():
     rv2 = cur.fetchall()
 
     
-    
     x = [s[0] for s in rv]
-    xx = [s[0] for s in rv3]
     y = [i[0] for i in rv1]
     w = [str(u[0]) for u in rv2]
 
@@ -405,8 +404,13 @@ def dailyreport():
         z.append(round(((number / x[0])*100),2))
 
     zz = []
-    for number in gtoday:
-        zz.append(round(((number / xx[0])*100),2))
+
+    if not xx[0]:
+        for number in gtoday:
+            zz.append('/')
+    else:
+        for number in gtoday:
+            zz.append(round(((number / xx[0])*100),2))
 
     if not zz:
         zz = [0,0,0,0,0,0,0,0]
@@ -427,7 +431,7 @@ def dailyreport():
     cur = mysql.connection.cursor()
 
     con = " MachineTab.MACH_NAME"
-    fom = " sum(FuelEntry.Fuel_Val), sum(TM_Val), ROUND((SUM(FuelEntry.Fuel_Val)/sum(TM_Val)),2)"
+    fom = " sum(FuelEntry.Fuel_Val), TMEntry.TM_Val, ROUND((SUM(FuelEntry.Fuel_Val)/TMEntry.TM_Val),2)"
     tab = "FuelEntry, MachineTab, FuelTab, TMEntry"
     joi = "FuelEntry.Fuel_ID = FuelTab.Fuel_ID AND FuelEntry.Mach_ID = MachineTab.Mach_ID AND TMEntry.TM_Date = FuelEntry.Date"
     cur.execute(f'''select {con} , {fom}  from {tab} where {joi} and Date = {d1} group by MachineTab.MACH_NAME''')
@@ -437,21 +441,17 @@ def dailyreport():
 
     row_headers = ['Machine', 'FuelUsed' , 'TM', 'TMFuel']
     json_data6 = []
-
-    def sids_converter(o):
-        if isinstance(o, datetime.date):
-                return str(o.year) + str("/") + str(o.month) + str("/") + str(o.day)
-
+    
     for row in rv:
         json_data6.append(dict(zip(row_headers,row)))
 
 
     json_final = {}
-    #json_final['Greenleaf'] = json_data
-    #json_final['TeaMade'] = json_data1
-    #json_final['Mandays'] = json_data2
-    #json_final['Plucking'] = json_data3
-    #json_final['Cultivation'] = json_data4
-    #json_final['GradePer'] = json_data5
+    json_final['Greenleaf'] = json_data
+    json_final['TeaMade'] = json_data1
+    json_final['Mandays'] = json_data2
+    json_final['Plucking'] = json_data3
+    json_final['Cultivation'] = json_data4
+    json_final['GradePer'] = json_data5
     json_final['FuelReport'] = json_data6
     return json.dumps(json_final,default=sids_converter)
