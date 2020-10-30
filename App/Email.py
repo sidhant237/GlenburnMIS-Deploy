@@ -32,7 +32,7 @@ def email():
 def email_report(d1):
     cur = mysql.connection.cursor()    
     if not d1:
-        d1 = '2020-10-15'
+        d1 = '2020-10-30'
     d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
     d01 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(days=1))).split(' ')[0] + "'"
     d1 = "'" + d1 + "'"
@@ -219,7 +219,7 @@ def email_report(d1):
     tab3 = "FieldEntry"
     cur.execute(f'''select {val3} from {tab3} where Date = {d01}''')
     rv3 = cur.fetchall()
-    if not rv3:
+    if not rv3[0][0]:
         glyest = [0]
     elif rv3[0][0] == 0:
         glyest = [0]
@@ -232,7 +232,7 @@ def email_report(d1):
     tab = "TMEntry"
     cur.execute(f'''select {val} from {tab} where TM_Date = {d1} ''')
     rv1 = cur.fetchall()
-    if not rv1:
+    if not rv1[0][0]:
         tmtoday = [0]
     elif rv1[0][0] == 0:
         tmtoday = [0]

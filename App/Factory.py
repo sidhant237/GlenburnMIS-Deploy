@@ -71,7 +71,7 @@ def displayfactory():
       tab3 = "FieldEntry"
       cur.execute(f'''select {val3} from {tab3} where Date = {d01}''')
       rv3 = cur.fetchall()
-      if not rv3:
+      if not rv3[0][0]:
             glyest = ['/']
       elif rv3[0][0] == 0:
             glyest = ['/']
@@ -84,7 +84,7 @@ def displayfactory():
       tab = "TMEntry"
       cur.execute(f'''select {val} from {tab} where TM_Date = {d1} ''')
       rv1 = cur.fetchall()
-      if not rv1:
+      if not rv1[0][0]:
             tmtoday = ['/']
       elif rv1[0][0] == 0:
             tmtoday = ['/']

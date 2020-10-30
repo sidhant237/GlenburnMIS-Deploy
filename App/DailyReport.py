@@ -12,7 +12,7 @@ def dailyreport():
     cur = mysql.connection.cursor()
     d1 = request.args.get("start")
     if not d1:
-      d1 = '2020-10-23'
+      d1 = '2020-10-30'
     d11 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(years=1))).split(' ')[0] + "'"
     d01 = "'" + str((datetime.datetime.strptime(d1, '%Y-%m-%d') - relativedelta(days=1))).split(' ')[0] + "'"
     d1 = "'" + d1 + "'"
@@ -201,7 +201,7 @@ def dailyreport():
     tab3 = "FieldEntry"
     cur.execute(f'''select {val3} from {tab3} where Date = {d01}''')
     rv3 = cur.fetchall()
-    if not rv3:
+    if not rv3[0][0]:
         glyest = ['/']
     elif rv3[0][0] == 0:
         glyest = ['/']
@@ -214,7 +214,7 @@ def dailyreport():
     tab = "TMEntry"
     cur.execute(f'''select {val} from {tab} where TM_Date = {d1} ''')
     rv1 = cur.fetchall()
-    if not rv1:
+    if not rv1[0][0]:
         tmtoday = ['/']
     elif rv1[0][0] == 0:
         tmtoday = ['/']
@@ -235,10 +235,10 @@ def dailyreport():
     cur.execute(f'''select {val1} from {tab1} where TM_Date >= {d0} AND TM_Date <= {d1} ''')
     rv2 = cur.fetchall()
     xx = [i[0] for i in rv2]
-
+    
 
     #[Recovery today] - APPENDED
-    if glyest[0] == '/' or tmtoday[0] == '/':
+    if glyest == ['/'] or tmtoday == ['/']:
         rv.append('/')
     else:
         rectoday = round((tmtoday[0] / glyest[0])*100,2)
